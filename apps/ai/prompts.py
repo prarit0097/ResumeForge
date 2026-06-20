@@ -132,6 +132,26 @@ def structure_messages(raw: str) -> list[dict]:
     ]
 
 
+def enhance_messages(data: dict) -> list[dict]:
+    return [
+        {"role": "system", "content": (
+            "You are an expert ATS resume editor. You are given a resume as a JSON "
+            "object. Return an IMPROVED version of the SAME JSON object with the "
+            "SAME keys and structure. Improvements you must make: rewrite the "
+            "'summary' to be sharp, specific and keyword-rich (2-3 sentences); "
+            "rewrite every work and project 'highlights' bullet so it starts with a "
+            "strong action verb, is concise, and includes a quantified result when "
+            "one is genuinely implied by the original text. Keep all companies, "
+            "titles, dates, education and facts EXACTLY as given — never invent "
+            "employers, numbers, or experience that is not implied. Do not add or "
+            "remove jobs. Keep the same top-level keys (basics, work, education, "
+            "skills, ...). Do NOT wrap the result in an outer key. Return ONLY the "
+            "JSON object, no prose, no markdown."
+        )},
+        {"role": "user", "content": f"Resume JSON to improve:\n\n{data}"},
+    ]
+
+
 def prompt_edit_messages(text: str, instruction: str) -> list[dict]:
     return [
         {"role": "system", "content": SYSTEM_WRITER},

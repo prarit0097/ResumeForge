@@ -24,7 +24,8 @@ def test_upload_docx_creates_draft_and_redirects(client):
     upload = SimpleUploadedFile("resume.docx", _make_docx(), content_type=DOCX_MIME)
     resp = client.post("/enhance/", {"resume": upload})
     assert resp.status_code == 302
-    assert "/edit/" in resp["Location"]
+    # Enhance flow lands on the before/after comparison page first.
+    assert "/compare/" in resp["Location"]
 
 
 def test_upload_rejects_wrong_type(client):

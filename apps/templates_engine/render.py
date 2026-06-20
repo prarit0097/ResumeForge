@@ -12,10 +12,25 @@ from django.template.loader import render_to_string
 from . import registry
 
 
+class _DataShim:
+    """Minimal stand-in so a raw resume-data dict can be rendered by the same
+    partials that expect a Resume model (they only read ``.data``)."""
+
+    def __init__(self, data: dict, template_id: str):
+        self.data = data
+        self.template_id = template_id
+
+
 def render_resume_partial(resume, template_id: str | None = None) -> str:
     """Return just the <article> resume HTML (for htmx preview swaps)."""
     meta = registry.get(template_id or resume.template_id)
     return render_to_string(meta.partial, {"resume": resume, "meta": meta})
+
+
+def render_data_partial(data: dict, template_id: str) -> str:
+    """Render a raw resume-data dict (e.g. the pre-enhancement snapshot)."""
+    meta = registry.get(template_id)
+    return render_to_string(meta.partial, {"resume": _DataShim(data, template_id), "meta": meta})
 
 
 def render_resume_document(resume, template_id: str | None = None, *,

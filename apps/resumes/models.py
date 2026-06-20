@@ -32,6 +32,9 @@ class Resume(models.Model):
 
     title = models.CharField(max_length=200, blank=True, default="Untitled resume")
     data = models.JSONField(default=schema.empty_resume)
+    # Snapshot of the resume as first parsed (before AI enhancement), used for the
+    # before/after comparison on the enhance flow. Null for from-scratch builds.
+    original_data = models.JSONField(null=True, blank=True)
     template_id = models.CharField(max_length=64, default=DEFAULT_TEMPLATE_ID)
 
     target_role = models.CharField(max_length=200, blank=True, default="")

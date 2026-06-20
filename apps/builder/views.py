@@ -60,6 +60,46 @@ def editor(request, resume_id):
     return render(request, "builder/editor.html", context)
 
 
+def compare(request, resume_id):
+    """Before/after view for the enhance flow: original vs AI-enhanced, with the
+    ATS score delta and a concrete list of improvements + benefits."""
+    from apps.ai import enhance as ai_enhance
+    from apps.ats import compatibility
+    from apps.templates_engine.render import render_data_partial
+
+    resume = get_resume_or_404(request, resume_id)
+    original = resume.original_data or resume.data
+    enhanced = resume.data
+    meta = registry.get(resume.template_id)
+
+    before = compatibility.score_resume(original, meta)
+    after = compatibility.score_resume(enhanced, meta)
+    summary = ai_enhance.summarize_improvements(
+        original, enhanced, before["score"], after["score"])
+
+    return render(request, "builder/compare.html", {
+        "resume": resume,
+        "token": resume.edit_token,
+        "edit_url": edit_url(resume),
+        "before_html": render_data_partial(original, resume.template_id),
+        "after_html": render_data_partial(enhanced, resume.template_id),
+        "before_score": before,
+        "after_score": after,
+        "summary": summary,
+        "template": meta,
+    })
+
+
+@require_POST
+def use_original(request, resume_id):
+    """Discard the enhancement and keep the user's original parsed resume."""
+    resume = get_resume_or_404(request, resume_id)
+    if resume.original_data:
+        resume.data = resume.original_data
+        resume.save(update_fields=["data", "updated_at"])
+    return redirect(edit_url(resume))
+
+
 def wizard(request, resume_id):
     """Light intake: name, target role, experience level. Then to the editor."""
     resume = get_resume_or_404(request, resume_id)
