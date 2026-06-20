@@ -132,6 +132,33 @@ def structure_messages(raw: str) -> list[dict]:
     ]
 
 
+def extract_and_enhance_messages(raw: str) -> list[dict]:
+    """One call that returns BOTH a faithful extraction and an ATS-improved
+    version — halves latency vs structuring then enhancing separately."""
+    return [
+        {"role": "system", "content": (
+            "You process a raw resume in ONE pass and return a JSON object with "
+            "exactly two top-level keys: \"original\" and \"enhanced\".\n"
+            "\"original\": a faithful extraction of the resume into the JSON Resume "
+            "shape below — extract every field present, infer the name from the top "
+            "line, normalize dates to YYYY-MM, never change wording, never invent.\n"
+            "\"enhanced\": the SAME resume but ATS-improved — rewrite the summary to "
+            "be sharp and keyword-rich, and rewrite every work/project highlight to "
+            "start with a strong action verb and include a quantified result when "
+            "genuinely implied. Keep all companies, titles, dates and facts exactly; "
+            "never invent employers, numbers or jobs.\n"
+            "Both objects use these keys: basics{name,label,email,phone,location,url,"
+            "summary,profiles[]}, work[{company,position,location,startDate,endDate,"
+            "current,summary,highlights[]}], education[{institution,area,studyType,"
+            "startDate,endDate,score}], skills[{name,keywords[]}], projects[{name,"
+            "description,highlights[]}], certifications[{name,issuer,date}], awards[], "
+            "languages[{language,fluency}]. Return ONLY the JSON object {\"original\":"
+            "{...},\"enhanced\":{...}}, no prose, no markdown."
+        )},
+        {"role": "user", "content": f"Resume text:\n\n{raw}"},
+    ]
+
+
 def enhance_messages(data: dict) -> list[dict]:
     return [
         {"role": "system", "content": (

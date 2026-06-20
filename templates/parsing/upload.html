@@ -89,15 +89,16 @@
         this.processing = true;
         this.pct = 0;
         this._timer = setInterval(() => {
-          // Ease toward 95% so it feels alive without ever "finishing" early.
+          // Ease toward 95% gradually (the AI step can take 20-40s); never
+          // "finish" early — the redirect completes it.
           const target = 95;
-          this.pct += Math.max(0.4, (target - this.pct) * 0.04);
+          this.pct += Math.max(0.18, (target - this.pct) * 0.016);
           if (this.pct > target) this.pct = target;
           this.stage =
-            this.pct < 30 ? "Reading your resume…" :
-            this.pct < 55 ? "Extracting your experience…" :
-            this.pct < 80 ? "Structuring sections with AI…" :
-            "Running ATS health check…";
+            this.pct < 25 ? "Reading your resume…" :
+            this.pct < 50 ? "Extracting your experience…" :
+            this.pct < 75 ? "Rewriting your bullets with AI…" :
+            "Scoring and polishing…";
         }, 180);
       },
     };

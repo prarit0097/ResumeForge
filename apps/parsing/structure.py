@@ -68,20 +68,57 @@ def to_resume_json(raw_text: str) -> dict:
         result = MockProvider().structured(
             [], _STRUCTURE_SCHEMA, task="structure_resume", context={"raw": raw_text})
 
-    merged = schema.merge_into_resume(base, result)
-    errors = schema.validate_resume_data(merged)
-    if not errors:
-        return merged
+    return _coerce_to_resume(result)
 
-    logger.warning("Structured resume failed validation: %s", errors[:3])
+
+def _coerce_to_resume(result: dict) -> dict:
+    """Merge an LLM section dict onto an empty resume, salvaging valid sections."""
+    base = schema.empty_resume()
+    merged = schema.merge_into_resume(base, result)
+    if not schema.validate_resume_data(merged):
+        return merged
     # Don't throw away every section because one is malformed. Re-merge each
-    # known section individually and keep the ones that validate, so a single
-    # bad field (e.g. work[2].startDate) can't blank out the whole resume.
+    # known section individually and keep the ones that validate.
     safe = schema.empty_resume()
-    for key in schema.empty_resume().keys():
+    for key in base.keys():
         if key not in result:
             continue
         candidate = schema.merge_into_resume(safe, {key: result[key]})
         if not schema.validate_resume_data(candidate):
             safe = candidate
     return safe
+
+
+def extract_and_enhance(raw_text: str) -> tuple[dict, dict]:
+    """ONE LLM call returning (original, enhanced) — halves the latency of the
+    enhance flow vs structuring then enhancing in two separate round-trips.
+
+    Falls back gracefully: if the combined call doesn't yield both, we structure
+    once and enhance locally so the flow always produces a usable result."""
+    try:
+        result = get_provider().structured(
+            prompts.extract_and_enhance_messages(raw_text), _STRUCTURE_SCHEMA,
+            task="extract_and_enhance", context={"raw": raw_text}, strict=False,
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception("Combined extract+enhance failed")
+        result = {}
+
+    orig_raw = result.get("original") if isinstance(result, dict) else None
+    enh_raw = result.get("enhanced") if isinstance(result, dict) else None
+
+    if isinstance(orig_raw, dict) and (_KNOWN_SECTIONS & set(orig_raw.keys())):
+        original = _coerce_to_resume(_unwrap_envelope(orig_raw))
+        if isinstance(enh_raw, dict) and (_KNOWN_SECTIONS & set(enh_raw.keys())):
+            enhanced = _coerce_to_resume(_unwrap_envelope(enh_raw))
+        else:
+            enhanced = original
+        return original, enhanced
+
+    # Fallback: faithful structure (handles mock/offline + odd responses), then
+    # enhance separately.
+    from apps.ai import enhance as ai_enhance
+
+    original = to_resume_json(raw_text)
+    enhanced = ai_enhance.enhance_resume_data(original)
+    return original, enhanced

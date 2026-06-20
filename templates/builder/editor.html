@@ -8,7 +8,7 @@
 {{ resume.data|json_script:"resume-data" }}
 <div x-data="resumeEditor({
         data: JSON.parse(document.getElementById('resume-data').textContent),
-        title: {{ resume.title|stringformat:'r'|escapejs|default:'' }} || 'Untitled resume',
+        title: '{{ resume.title|escapejs }}' || 'Untitled resume',
         csrf: '{{ csrf_token }}',
         urls: {
           autosave: '{% url 'resumes:autosave' resume.id %}?t={{ token }}',
