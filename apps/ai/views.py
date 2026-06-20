@@ -31,12 +31,12 @@ def improve(request, resume_id):
     payload = _json(request)
     if payload is None:
         return HttpResponseBadRequest("Bad payload")
-    text = str(payload.get("text", ""))
+    text = str(payload.get("text", ""))[:6000]
     instruction = payload.get("instruction")
     if instruction:
-        result = services.prompt_edit(text, str(instruction))
+        result = services.prompt_edit(text, str(instruction)[:500])
     else:
-        result = services.improve_text(text, payload.get("kind", "summary"))
+        result = services.improve_text(text, str(payload.get("kind", "summary"))[:40])
     return JsonResponse({"text": result})
 
 
@@ -48,8 +48,8 @@ def bullets(request, resume_id):
     if payload is None:
         return HttpResponseBadRequest("Bad payload")
     context = {
-        "position": str(payload.get("position", "")),
-        "company": str(payload.get("company", "")),
-        "summary": str(payload.get("summary", "")),
+        "position": str(payload.get("position", ""))[:200],
+        "company": str(payload.get("company", ""))[:200],
+        "summary": str(payload.get("summary", ""))[:2000],
     }
     return JsonResponse({"bullets": services.generate_bullets(context)})

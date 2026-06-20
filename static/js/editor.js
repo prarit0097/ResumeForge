@@ -62,9 +62,6 @@ function resumeEditor(config) {
     addHighlight(item) { item.highlights.push(""); },
     remove(arr, idx) { arr.splice(idx, 1); },
 
-    keywordsText: {
-      get() { return ""; },
-    },
     skillKeywords(skill) { return (skill.keywords || []).join(", "); },
     setSkillKeywords(skill, value) {
       skill.keywords = value.split(",").map((s) => s.trim()).filter(Boolean);
@@ -121,8 +118,8 @@ function resumeEditor(config) {
         if (res.ok) {
           const json = await res.json();
           if (json.ok) {
-            this.score = json.ats || this.score;
-            this.match = json.match || this.match;
+            if (json.ats != null) this.score = json.ats;
+            if (json.match != null) this.match = json.match;
             // Reload to reflect AI-rewritten content in the form + preview.
             window.location.reload();
           }
@@ -130,10 +127,16 @@ function resumeEditor(config) {
       } finally { this.aiBusy = false; }
     },
 
+    // Resolve/assign a dotted path against this.data, e.g. "basics.summary".
     getByPath(path) {
-      return path.split(".").reduce((o, k) => (o ? o[k] : undefined), { data: this.data, ...this.data });
+      return path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), this.data);
     },
-    setByPath() { /* implemented per-field via x-model in templates */ },
+    setByPath(path, value) {
+      const keys = path.split(".");
+      const last = keys.pop();
+      const obj = keys.reduce((o, k) => (o == null ? undefined : o[k]), this.data);
+      if (obj && typeof obj === "object") obj[last] = value;
+    },
 
     // --- score panel (Phase 5) ---
     score: null,

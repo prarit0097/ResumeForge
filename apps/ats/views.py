@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
 from apps.ai import services as ai_services
+from apps.resumes import schema
 from apps.resumes import services as resume_services
 from apps.templates_engine import registry
 from core.access import get_resume_or_404
@@ -35,7 +37,11 @@ def score(request, resume_id):
         return HttpResponseBadRequest("Bad payload")
 
     data = payload.get("data") or resume.data
-    jd = (payload.get("jd") or resume.job_description or "").strip()
+    # Client-supplied data is untrusted; fall back to the saved (valid) data if
+    # it's malformed so the scorers never crash on a bad shape.
+    if schema.validate_resume_data(data):
+        data = resume.data
+    jd = (payload.get("jd") or resume.job_description or "").strip()[:8000]
     meta = registry.get(resume.template_id)
 
     ats = compatibility.score_resume(data, meta)
@@ -63,7 +69,7 @@ def tailor(request, resume_id):
     if not jd:
         return JsonResponse({"ok": False, "error": "Add a job description first."}, status=400)
 
-    data = resume.data
+    data = deepcopy(resume.data)
     basics = data.get("basics", {})
     if basics.get("summary"):
         basics["summary"] = ai_services.rewrite_to_jd(basics["summary"], jd)

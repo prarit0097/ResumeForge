@@ -32,6 +32,10 @@
       <span class="text-slate-400" x-show="saving">Saving…</span>
       <span class="text-emerald-600" x-show="!saving && savedAt" x-transition>Saved</span>
       <span class="text-red-600" x-text="saveError"></span>
+      <form method="post" action="{% url 'builder:create_variant' resume.id %}?t={{ token }}" class="hidden md:block">
+        {% csrf_token %}
+        <button class="rounded-lg border border-slate-300 px-3 py-1.5 hover:border-brand" title="Make a tailored copy for a specific job">Tailored copy</button>
+      </form>
       <a href="{% url 'coverletters:cover_letter' resume.id %}?t={{ token }}" class="hidden sm:inline rounded-lg border border-slate-300 px-3 py-1.5 hover:border-brand">Cover letter</a>
       <a :href="urls.gallery" class="rounded-lg border border-slate-300 px-3 py-1.5 hover:border-brand">Templates</a>
       <a href="{% url 'exporting:download_menu' resume.id %}?t={{ token }}"

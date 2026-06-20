@@ -7,8 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     DEBUG=(bool, True),
-    SECRET_KEY=(str, "dev-insecure-key-change-in-production"),
-    ALLOWED_HOSTS=(list, ["*"]),
+    SECRET_KEY=(str, ""),
+    ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
     OPENROUTER_API_KEY=(str, ""),
     LLM_MODEL=(str, "deepseek/deepseek-chat-v3-0324"),
     LLM_FREE_MODEL=(str, "deepseek/deepseek-chat-v3-0324:free"),
@@ -20,9 +20,19 @@ env_file = BASE_DIR / ".env"
 if env_file.exists():
     env.read_env(str(env_file))
 
-SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+
+# In production a real SECRET_KEY is mandatory. In DEBUG we generate an
+# ephemeral one so local dev needs no config — but never ship a known key.
+SECRET_KEY = env("SECRET_KEY")
+if not SECRET_KEY:
+    if DEBUG:
+        from django.core.management.utils import get_random_secret_key
+
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise RuntimeError("SECRET_KEY must be set in production (set it in .env).")
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
@@ -107,6 +117,15 @@ ALLOWED_UPLOAD_TYPES = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
 
-# Security headers tightened in production via env.
+# Security headers. The TLS-dependent ones only activate outside DEBUG so local
+# HTTP development still works.
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -4,6 +4,7 @@ from __future__ import annotations
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
 
 from apps.resumes import services
 from apps.templates_engine import registry
@@ -23,6 +24,7 @@ def start_new(request):
     return response
 
 
+@require_POST
 def create_variant(request, resume_id):
     """Make a tailored copy of a resume (for a specific job) and open it."""
     resume = get_resume_or_404(request, resume_id)

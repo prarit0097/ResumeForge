@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .constants import STRONG_ACTION_VERBS, WEAK_OPENERS
+from .constants import STRONG_ACTION_VERBS
 
 _NUMBER_RE = re.compile(r"\d")
 _EMAIL_RE = re.compile(r"^[\w.+-]+@[\w-]+\.[\w.-]+$")
@@ -49,7 +49,9 @@ def _contact(data: dict) -> Dimension:
     missing = [k for k in ("name", "email", "phone") if not (b.get(k) or "").strip()]
     if not email_ok and (b.get("email") or "").strip():
         missing.append("a valid email")
-    return Dimension("contact", "Contact info", 15, have / 3, "fail",
+    # An invalid email shouldn't count toward the score even if the field is filled.
+    effective = have - (1 if (have == 3 and not email_ok) else 0)
+    return Dimension("contact", "Contact info", 15, effective / 3, "fail",
                      f"Add {', '.join(missing) or 'valid contact info'} so recruiters can reach you.")
 
 
@@ -90,8 +92,6 @@ def _action_verbs(data: dict) -> Dimension:
         first = re.sub(r"[^a-z]", "", b.strip().split(" ")[0].lower())
         if first in STRONG_ACTION_VERBS:
             strong += 1
-        elif first in WEAK_OPENERS:
-            strong += 0
     ratio = strong / len(bullets)
     if ratio >= 0.8:
         return Dimension("verbs", "Action verbs", 15, 1.0, "ok",

@@ -41,6 +41,7 @@ def autosave(request, resume_id):
     if errors:
         return JsonResponse({"ok": False, "errors": errors}, status=400)
 
+    # Save the title BEFORE rendering so the preview reflects it this round-trip.
     if payload.get("title"):
         resume.title = str(payload["title"])[:200]
         resume.save(update_fields=["title", "updated_at"])
