@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Cover letter{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+  <div class="flex items-center justify-between mb-5">
+    <h1 class="font-display text-2xl font-semibold">Cover letter</h1>
+    <a href="{% url 'builder:editor' resume.id %}?t={{ token }}" class="text-sm text-brand hover:underline">← Back to editor</a>
+  </div>
+
+  <div class="flex items-center gap-3 mb-4">
+    <form method="post" action="{% url 'coverletters:generate' resume.id %}?t={{ token }}">
+      {% csrf_token %}
+      <button class="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark">
+        ✨ {% if letter %}Regenerate{% else %}Generate{% endif %} with AI
+      </button>
+    </form>
+    {% if not resume.job_description %}
+    <span class="text-xs text-slate-400">Tip: add a job description in the editor for a tailored letter.</span>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{% url 'coverletters:save' resume.id %}?t={{ token }}">
+    {% csrf_token %}
+    <textarea name="body" class="rf-in min-h-[420px] font-sans leading-relaxed"
+              placeholder="Your cover letter will appear here. Generate one with AI or write your own.">{{ letter.body }}</textarea>
+    <button class="mt-3 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:border-brand">Save</button>
+  </form>
+</div>
+{% endblock %}

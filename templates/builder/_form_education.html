@@ -1,0 +1,20 @@
+{# Education: repeatable entries. #}
+<section x-show="activeTab==='education'" x-cloak class="space-y-4">
+  <template x-for="(ed, i) in data.education" :key="i">
+    <div class="rounded-xl border border-slate-200 p-3 space-y-3 bg-white">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-400" x-text="'Education ' + (i+1)"></span>
+        <button type="button" @click="remove(data.education, i)" class="rf-del">Remove</button>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <input class="rf-in" x-model="ed.studyType" placeholder="B.Sc.">
+        <input class="rf-in" x-model="ed.area" placeholder="Computer Science">
+        <input class="rf-in" x-model="ed.institution" placeholder="University name">
+        <input class="rf-in" x-model="ed.score" placeholder="GPA / grade (optional)">
+        <input class="rf-in" x-model="ed.startDate" placeholder="2017-09">
+        <input class="rf-in" x-model="ed.endDate" placeholder="2021-06">
+      </div>
+    </div>
+  </template>
+  <button type="button" @click="addEducation()" class="rf-add-block">+ Add education</button>
+</section>

@@ -1,0 +1,42 @@
+{# More: projects, certifications, and a job-description box for tailoring. #}
+<section x-show="activeTab==='more'" x-cloak class="space-y-6">
+  <div>
+    <h3 class="font-semibold mb-2">Projects</h3>
+    <template x-for="(pr, i) in data.projects" :key="i">
+      <div class="rounded-xl border border-slate-200 p-3 space-y-2 bg-white mb-3">
+        <div class="flex items-center justify-between">
+          <input class="rf-in max-w-xs" x-model="pr.name" placeholder="Project name">
+          <button type="button" @click="remove(data.projects, i)" class="rf-del">Remove</button>
+        </div>
+        <textarea class="rf-in min-h-[44px]" x-model="pr.description" placeholder="One line on what it does"></textarea>
+        <template x-for="(h, hi) in pr.highlights" :key="hi">
+          <div class="flex gap-2">
+            <input class="rf-in" x-model="pr.highlights[hi]" placeholder="Highlight / result">
+            <button type="button" @click="remove(pr.highlights, hi)" class="rf-del shrink-0">✕</button>
+          </div>
+        </template>
+        <button type="button" @click="addHighlight(pr)" class="rf-add">+ Add highlight</button>
+      </div>
+    </template>
+    <button type="button" @click="addProject()" class="rf-add-block">+ Add project</button>
+  </div>
+
+  <div>
+    <h3 class="font-semibold mb-2">Certifications</h3>
+    <template x-for="(c, i) in data.certifications" :key="i">
+      <div class="flex gap-2 mb-2">
+        <input class="rf-in" x-model="c.name" placeholder="Certification">
+        <input class="rf-in max-w-[10rem]" x-model="c.issuer" placeholder="Issuer">
+        <input class="rf-in max-w-[7rem]" x-model="c.date" placeholder="2023">
+        <button type="button" @click="remove(data.certifications, i)" class="rf-del shrink-0">✕</button>
+      </div>
+    </template>
+    <button type="button" @click="addCert()" class="rf-add-block">+ Add certification</button>
+  </div>
+
+  <div>
+    <h3 class="font-semibold mb-2">Target job description <span class="text-slate-400 font-normal text-sm">(optional — powers tailoring & match score)</span></h3>
+    <textarea class="rf-in min-h-[120px]" x-model="data.__jd"
+              placeholder="Paste the job description you're targeting here."></textarea>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Let's get started{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl px-4 sm:px-6 py-12">
+  <p class="text-sm font-medium text-brand">Step 1 of 2</p>
+  <h1 class="mt-1 font-display text-3xl font-semibold">Tell us the basics</h1>
+  <p class="mt-2 text-slate-600">We'll personalize AI suggestions and pick smart defaults. You can change everything later.</p>
+
+  <form method="post" class="mt-8 space-y-5">
+    {% csrf_token %}
+    <label class="block">
+      <span class="rf-lbl">Your name</span>
+      <input class="rf-in" name="name" placeholder="Jane Doe" autofocus>
+    </label>
+    <label class="block">
+      <span class="rf-lbl">Target role</span>
+      <input class="rf-in" name="target_role" placeholder="Senior Software Engineer">
+    </label>
+    <fieldset>
+      <span class="rf-lbl">Experience level</span>
+      <div class="grid grid-cols-2 gap-2 mt-1">
+        {% for value, label in levels %}
+        <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-brand">
+          <input type="radio" name="experience_level" value="{{ value }}" {% if forloop.first %}checked{% endif %}>
+          <span class="text-sm">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <div class="flex items-center justify-between pt-2">
+      <a href="{{ edit_url }}" class="text-sm text-slate-400 hover:text-slate-600">Skip →</a>
+      <button class="rounded-lg bg-brand px-5 py-2.5 font-medium text-white hover:bg-brand-dark">Start building →</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

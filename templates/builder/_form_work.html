@@ -1,0 +1,38 @@
+{# Work experience: repeatable entries with bullet highlights. #}
+<section x-show="activeTab==='work'" x-cloak class="space-y-4">
+  <template x-for="(job, i) in data.work" :key="i">
+    <div class="rounded-xl border border-slate-200 p-3 space-y-3 bg-white">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-400" x-text="'Experience ' + (i+1)"></span>
+        <button type="button" @click="remove(data.work, i)" class="rf-del">Remove</button>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <input class="rf-in" x-model="job.position" placeholder="Job title">
+        <input class="rf-in" x-model="job.company" placeholder="Company">
+        <input class="rf-in" x-model="job.location" placeholder="Location">
+        <div class="grid grid-cols-2 gap-2">
+          <input class="rf-in" x-model="job.startDate" placeholder="2021-03">
+          <input class="rf-in" x-model="job.endDate" placeholder="2024-01" :disabled="job.current">
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm text-slate-600">
+        <input type="checkbox" x-model="job.current"> I currently work here
+      </label>
+      <div>
+        <span class="rf-lbl flex items-center justify-between">
+          Achievements (bullets)
+          <button type="button" @click="aiGenerateBullets(i)" :disabled="aiBusy" class="rf-ai-btn">✨ Suggest bullets</button>
+        </span>
+        <template x-for="(h, hi) in job.highlights" :key="hi">
+          <div class="flex gap-2 mb-2">
+            <textarea class="rf-in min-h-[44px]" x-model="job.highlights[hi]"
+                      placeholder="Led X to achieve Y, resulting in Z% improvement"></textarea>
+            <button type="button" @click="remove(job.highlights, hi)" class="rf-del shrink-0">✕</button>
+          </div>
+        </template>
+        <button type="button" @click="addHighlight(job)" class="rf-add">+ Add bullet</button>
+      </div>
+    </div>
+  </template>
+  <button type="button" @click="addWork()" class="rf-add-block">+ Add experience</button>
+</section>

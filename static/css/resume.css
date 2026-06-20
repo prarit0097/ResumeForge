@@ -1,0 +1,88 @@
+/* Resume document styles — shared by live preview and PDF/PNG export.
+   Kept print-safe: physical units, no fancy effects, selectable text. */
+
+.rf-doc {
+  --accent: #4f46e5;
+  --ink: #1a1a1a;
+  --muted: #555;
+  --rule: #d9d9d9;
+  background: #fff;
+  color: var(--ink);
+  font-family: "Inter", Arial, Helvetica, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.42;
+  width: 8.5in;
+  min-height: 11in;
+  padding: 0.6in 0.7in;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.rf-doc h1,
+.rf-doc h2 { margin: 0; }
+
+.rf-name {
+  font-size: 22pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.rf-label { margin: 2px 0 0; color: var(--accent); font-weight: 600; font-size: 11pt; }
+.rf-contact { margin: 6px 0 0; color: var(--muted); font-size: 9.5pt; }
+.rf-contact span:not(:last-child)::after { content: "  |  "; color: var(--rule); }
+
+.rf-section { margin-top: 14px; }
+.rf-section > h2 {
+  font-size: 11pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+  padding-bottom: 2px;
+  margin-bottom: 6px;
+}
+.rf-summary { margin: 0; }
+.rf-entry { margin-bottom: 9px; }
+.rf-entry-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.rf-entry-title { font-weight: 700; }
+.rf-dates { color: var(--muted); font-size: 9pt; white-space: nowrap; }
+.rf-entry-sub { color: var(--muted); font-style: italic; font-size: 9.5pt; }
+.rf-entry-summary { margin: 3px 0; }
+.rf-doc ul { margin: 4px 0 0; padding-left: 18px; }
+.rf-doc li { margin-bottom: 2px; }
+.rf-skills { margin: 0; }
+
+/* Serif heading variant (executive) */
+.rf-executive .rf-name,
+.rf-executive .rf-section > h2 { font-family: "Fraunces", Georgia, serif; }
+
+/* Two-column creative layout */
+.rf-two-col {
+  display: grid;
+  grid-template-columns: 2.3in 1fr;
+  gap: 0.4in;
+  padding: 0;
+}
+.rf-two-col .rf-side {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5in 0.35in;
+}
+.rf-two-col .rf-side .rf-name { color: #fff; font-size: 18pt; }
+.rf-two-col .rf-side .rf-label { color: rgba(255,255,255,0.85); }
+.rf-two-col .rf-side h2 {
+  font-size: 10pt; text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 2px; margin: 16px 0 6px;
+}
+.rf-two-col .rf-side-block .rf-skills,
+.rf-two-col .rf-contact-list { font-size: 9pt; }
+.rf-two-col .rf-contact-list { list-style: none; padding: 0; margin: 0; }
+.rf-two-col .rf-main { padding: 0.5in 0.4in 0.5in 0; }
+
+/* Preview scaling wrapper */
+.rf-preview-frame { background: #e5e7eb; padding: 16px; border-radius: 12px; overflow: auto; }
+.rf-preview-frame .rf-doc { box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+
+@media print {
+  .rf-doc { box-shadow: none; margin: 0; }
+}

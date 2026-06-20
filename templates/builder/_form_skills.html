@@ -1,0 +1,16 @@
+{# Skills: grouped name + comma-separated keywords. #}
+<section x-show="activeTab==='skills'" x-cloak class="space-y-4">
+  <p class="text-sm text-slate-500">Group skills by category. Keywords are comma-separated and matched against job descriptions.</p>
+  <template x-for="(skill, i) in data.skills" :key="i">
+    <div class="rounded-xl border border-slate-200 p-3 bg-white">
+      <div class="flex items-center justify-between mb-2">
+        <input class="rf-in max-w-[12rem]" x-model="skill.name" placeholder="e.g. Languages">
+        <button type="button" @click="remove(data.skills, i)" class="rf-del">Remove</button>
+      </div>
+      <input class="rf-in" :value="skillKeywords(skill)"
+             @input="setSkillKeywords(skill, $event.target.value)"
+             placeholder="Python, JavaScript, SQL (comma separated)">
+    </div>
+  </template>
+  <button type="button" @click="addSkill()" class="rf-add-block">+ Add skill group</button>
+</section>

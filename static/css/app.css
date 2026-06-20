@@ -1,0 +1,43 @@
+/* App chrome styles layered on top of Tailwind CDN. */
+:root { --rf-brand: #4f46e5; }
+
+[x-cloak] { display: none !important; }
+
+/* htmx loading affordance */
+.htmx-indicator { opacity: 0; transition: opacity 150ms ease; }
+.htmx-request .htmx-indicator { opacity: 1; }
+.htmx-request.htmx-indicator { opacity: 1; }
+
+/* Subtle field focus */
+.rf-field:focus { outline: 2px solid var(--rf-brand); outline-offset: 1px; }
+
+/* Editor form controls (layered on Tailwind CDN) */
+.rf-lbl { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem; }
+.rf-in {
+  width: 100%; border: 1px solid #cbd5e1; border-radius: 0.5rem;
+  padding: 0.5rem 0.625rem; font-size: 0.9rem; background: #fff; color: #0f172a;
+}
+.rf-in:focus { outline: none; border-color: var(--rf-brand); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+.rf-in:disabled { background: #f1f5f9; color: #94a3b8; }
+.rf-add { font-size: 0.8rem; color: var(--rf-brand); font-weight: 600; }
+.rf-add:hover { text-decoration: underline; }
+.rf-add-block {
+  width: 100%; border: 1.5px dashed #cbd5e1; border-radius: 0.75rem;
+  padding: 0.6rem; font-size: 0.875rem; font-weight: 600; color: #475569;
+}
+.rf-add-block:hover { border-color: var(--rf-brand); color: var(--rf-brand); }
+.rf-del { font-size: 0.75rem; color: #ef4444; }
+.rf-del:hover { text-decoration: underline; }
+.rf-ai-btn {
+  font-size: 0.72rem; font-weight: 600; color: var(--rf-brand);
+  background: #eef2ff; border-radius: 0.5rem; padding: 0.15rem 0.5rem;
+}
+.rf-ai-btn:disabled { opacity: 0.5; }
+
+/* Category chips (template gallery) */
+.rf-chip {
+  font-size: 0.8rem; padding: 0.3rem 0.75rem; border-radius: 9999px;
+  border: 1px solid #cbd5e1; color: #475569; background: #fff;
+}
+.rf-chip:hover { border-color: var(--rf-brand); color: var(--rf-brand); }
+.rf-chip-on { background: var(--rf-brand); color: #fff; border-color: var(--rf-brand); }

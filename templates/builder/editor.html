@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static resume_extras %}
+
+{% block title %}Edit — {{ resume.title }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'css/resume.css' %}">{% endblock %}
+
+{% block content %}
+{{ resume.data|json_script:"resume-data" }}
+<div x-data="resumeEditor({
+        data: JSON.parse(document.getElementById('resume-data').textContent),
+        title: {{ resume.title|stringformat:'r'|escapejs|default:'' }} || 'Untitled resume',
+        csrf: '{{ csrf_token }}',
+        urls: {
+          autosave: '{% url 'resumes:autosave' resume.id %}?t={{ token }}',
+          set_template: '{% url 'resumes:set_template' resume.id %}?t={{ token }}',
+          gallery: '{% url 'templates_engine:gallery' resume.id %}?t={{ token }}',
+          score: '{% url 'ats:score' resume.id %}?t={{ token }}',
+          tailor: '{% url 'ats:tailor' resume.id %}?t={{ token }}',
+          ai_improve: '{% url 'ai:improve' resume.id %}?t={{ token }}',
+          ai_bullets: '{% url 'ai:bullets' resume.id %}?t={{ token }}'
+        }
+     })"
+     x-cloak
+     class="mx-auto max-w-7xl px-3 sm:px-6 py-4">
+
+  <!-- toolbar -->
+  <div class="flex items-center justify-between gap-3 mb-4">
+    <input x-model="title"
+           class="rf-field bg-transparent font-display text-lg sm:text-2xl font-semibold rounded px-1 -ml-1 w-full max-w-md"
+           aria-label="Resume title">
+    <div class="flex items-center gap-2 shrink-0 text-sm">
+      <span class="text-slate-400" x-show="saving">Saving…</span>
+      <span class="text-emerald-600" x-show="!saving && savedAt" x-transition>Saved</span>
+      <span class="text-red-600" x-text="saveError"></span>
+      <a href="{% url 'coverletters:cover_letter' resume.id %}?t={{ token }}" class="hidden sm:inline rounded-lg border border-slate-300 px-3 py-1.5 hover:border-brand">Cover letter</a>
+      <a :href="urls.gallery" class="rounded-lg border border-slate-300 px-3 py-1.5 hover:border-brand">Templates</a>
+      <a href="{% url 'exporting:download_menu' resume.id %}?t={{ token }}"
+         class="rounded-lg bg-brand px-3 py-1.5 font-medium text-white hover:bg-brand-dark">Download</a>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6">
+    <!-- LEFT: form -->
+    <div>
+      <!-- tabs -->
+      <div class="flex flex-wrap gap-1 mb-4 border-b border-slate-200">
+        {% for key, label in tabs %}
+        <button @click="activeTab='{{ key }}'"
+                :class="activeTab==='{{ key }}' ? 'border-brand text-brand' : 'border-transparent text-slate-500'"
+                class="px-3 py-2 text-sm font-medium border-b-2 -mb-px">{{ label }}</button>
+        {% endfor %}
+      </div>
+
+      {% include "builder/_form_basics.html" %}
+      {% include "builder/_form_work.html" %}
+      {% include "builder/_form_education.html" %}
+      {% include "builder/_form_skills.html" %}
+      {% include "builder/_form_more.html" %}
+      {% include "builder/_score_panel.html" %}
+    </div>
+
+    <!-- RIGHT: live preview -->
+    <div class="lg:sticky lg:top-20 self-start w-full">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Live preview</h2>
+        <span class="text-xs text-slate-400">{{ template.name }}{% if not template.ats_safe %} · ⚠ creative{% endif %}</span>
+      </div>
+      <div class="rf-preview-frame" style="max-height: 78vh;">
+        <div id="preview" style="transform-origin: top center;">
+          {% include template.partial with resume=resume meta=template %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block body_extra %}<script src="{% static 'js/editor.js' %}"></script>{% endblock %}

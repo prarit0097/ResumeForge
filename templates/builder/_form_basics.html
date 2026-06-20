@@ -1,0 +1,38 @@
+{# Basics: contact + summary. x-show driven by activeTab. #}
+<section x-show="activeTab==='basics'" x-cloak class="space-y-4">
+  <div class="grid sm:grid-cols-2 gap-3">
+    <label class="block">
+      <span class="rf-lbl">Full name</span>
+      <input class="rf-in" x-model="data.basics.name" placeholder="Jane Doe">
+    </label>
+    <label class="block">
+      <span class="rf-lbl">Professional title</span>
+      <input class="rf-in" x-model="data.basics.label" placeholder="Senior Software Engineer">
+    </label>
+    <label class="block">
+      <span class="rf-lbl">Email</span>
+      <input class="rf-in" type="email" x-model="data.basics.email" placeholder="jane@email.com">
+    </label>
+    <label class="block">
+      <span class="rf-lbl">Phone</span>
+      <input class="rf-in" x-model="data.basics.phone" placeholder="+1 555 123 4567">
+    </label>
+    <label class="block">
+      <span class="rf-lbl">Location</span>
+      <input class="rf-in" x-model="data.basics.location" placeholder="Berlin, Germany">
+    </label>
+    <label class="block">
+      <span class="rf-lbl">Website / LinkedIn</span>
+      <input class="rf-in" x-model="data.basics.url" placeholder="linkedin.com/in/jane">
+    </label>
+  </div>
+  <label class="block">
+    <span class="rf-lbl flex items-center justify-between">
+      Professional summary
+      <button type="button" @click="aiImprove('basics.summary')" :disabled="aiBusy"
+              class="rf-ai-btn">✨ Improve with AI</button>
+    </span>
+    <textarea class="rf-in min-h-[90px]" x-model="data.basics.summary"
+              placeholder="2–3 lines on who you are and the value you bring."></textarea>
+  </label>
+</section>
