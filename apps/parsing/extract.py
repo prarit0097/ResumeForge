@@ -7,6 +7,7 @@ tables). Returns plain text in reading order.
 from __future__ import annotations
 
 import io
+import re
 
 from django.conf import settings
 
@@ -25,14 +26,63 @@ def _validate(uploaded) -> None:
         raise UploadError("Please upload a PDF or Word (.docx) file.")
 
 
+# A page that yields fewer than this many characters is treated as "sparse"
+# (often a multi-column or heavily designed layout that extract_text mangles),
+# and we re-assemble its text from positioned words instead.
+_SPARSE_PAGE_CHARS = 40
+
+
+def _page_text_from_words(page) -> str:
+    """Re-assemble page text from positioned words, grouped into rows.
+
+    pdfplumber's default ``extract_text`` can return jumbled or sparse output on
+    multi-column / designed resumes. Reading words sorted by vertical then
+    horizontal position and grouping ones on the same line recovers a sane
+    reading order without leaving PyMuPDF (AGPL)."""
+    words = page.extract_words(use_text_flow=False, keep_blank_chars=False) or []
+    if not words:
+        return ""
+    words.sort(key=lambda w: (round(float(w["top"]) / 3.0), float(w["x0"])))
+    lines: list[str] = []
+    current: list[str] = []
+    current_top: float | None = None
+    for w in words:
+        top = float(w["top"])
+        if current_top is None or abs(top - current_top) <= 3.0:
+            current.append(w["text"])
+            current_top = top if current_top is None else current_top
+        else:
+            lines.append(" ".join(current))
+            current = [w["text"]]
+            current_top = top
+    if current:
+        lines.append(" ".join(current))
+    return "\n".join(lines)
+
+
 def _extract_pdf(raw: bytes) -> str:
     import pdfplumber
 
     out: list[str] = []
     with pdfplumber.open(io.BytesIO(raw)) as pdf:
         for page in pdf.pages:
-            out.append(page.extract_text() or "")
-    return "\n".join(out).strip()
+            # Prefer layout-aware extraction (keeps columns/indentation closer to
+            # the visual order); fall back to plain extraction if unsupported.
+            try:
+                text = page.extract_text(layout=True) or ""
+            except Exception:  # noqa: BLE001 - older pdfplumber w/o layout kw
+                text = page.extract_text() or ""
+            # Sparse page: re-assemble from positioned words for a better result.
+            if len(text.strip()) < _SPARSE_PAGE_CHARS:
+                word_text = _page_text_from_words(page)
+                if len(word_text.strip()) > len(text.strip()):
+                    text = word_text
+            out.append(text)
+    # Collapse runs of intra-line spaces that layout=True introduces, but keep
+    # line structure (headings/bullets) intact for the structurer.
+    joined = "\n".join(out)
+    joined = "\n".join(re.sub(r"[ \t]{2,}", " ", ln).rstrip() for ln in joined.splitlines())
+    return joined.strip()
 
 
 def _extract_docx(raw: bytes) -> str:

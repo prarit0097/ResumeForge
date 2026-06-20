@@ -17,6 +17,8 @@ function resumeEditor(config) {
       // Deep-watch the whole model; debounce saves.
       this.$watch("data", () => this.queueSave());
       this.$watch("title", () => this.queueSave());
+      // Show the ATS health score immediately on open (esp. for enhanced resumes).
+      this.refreshScore();
     },
 
     queueSave() {

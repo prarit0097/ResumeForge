@@ -34,3 +34,17 @@ def test_has_both_ats_safe_and_creative():
     safe = [t for t in registry.all_templates() if t.ats_safe]
     creative = [t for t in registry.all_templates() if not t.ats_safe]
     assert safe and creative
+
+
+def test_no_template_syntax_leaks_into_output(strong_resume_data):
+    """Guard against multi-line {# #} comments (which Django renders literally)
+    or any unrendered template syntax appearing in the resume output."""
+    resume = Resume.objects.create(session_key="s", data=strong_resume_data)
+    leaks = []
+    for meta in registry.all_templates():
+        html = render_resume_partial(resume, meta.id)
+        for marker in ("{#", "#}", "{%", "%}", "{{", "}}"):
+            if marker in html:
+                leaks.append((meta.id, marker))
+                break
+    assert not leaks, f"template syntax leaked into output: {leaks[:5]}"

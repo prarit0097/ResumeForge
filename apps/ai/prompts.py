@@ -68,14 +68,67 @@ def cover_letter_messages(context: dict) -> list[dict]:
     ]
 
 
+_STRUCTURE_TARGET_SHAPE = (
+    "{\n"
+    '  "basics": {"name": "", "label": "", "email": "", "phone": "", '
+    '"location": "", "url": "", "summary": "", '
+    '"profiles": [{"network": "", "url": ""}]},\n'
+    '  "work": [{"company": "", "position": "", "location": "", '
+    '"startDate": "YYYY-MM", "endDate": "YYYY-MM", "current": false, '
+    '"summary": "", "highlights": ["..."]}],\n'
+    '  "education": [{"institution": "", "area": "", "studyType": "", '
+    '"startDate": "YYYY-MM", "endDate": "YYYY-MM", "score": ""}],\n'
+    '  "skills": [{"name": "", "keywords": ["..."]}],\n'
+    '  "projects": [{"name": "", "description": "", "highlights": ["..."]}],\n'
+    '  "certifications": [{"name": "", "issuer": "", "date": "YYYY-MM"}],\n'
+    '  "awards": [{"title": "", "date": "YYYY-MM", "awarder": ""}],\n'
+    '  "languages": [{"language": "", "fluency": ""}]\n'
+    "}"
+)
+
+_STRUCTURE_EXAMPLE = (
+    "Example input:\n"
+    "Jane Doe\n"
+    "Senior Engineer | jane@x.com | +1 555 0100\n"
+    "Summary\nBuilds reliable payment systems.\n"
+    "Experience\n"
+    "Senior Engineer - Acme  Jan 2021 - Present\n"
+    "- Cut latency 40%\n"
+    "Skills\nPython, Django, AWS\n\n"
+    "Example output:\n"
+    '{"basics": {"name": "Jane Doe", "label": "Senior Engineer", '
+    '"email": "jane@x.com", "phone": "+1 555 0100", '
+    '"summary": "Builds reliable payment systems."}, '
+    '"work": [{"company": "Acme", "position": "Senior Engineer", '
+    '"startDate": "2021-01", "current": true, '
+    '"highlights": ["Cut latency 40%"]}], '
+    '"skills": [{"name": "Skills", "keywords": ["Python", "Django", "AWS"]}]}'
+)
+
+
 def structure_messages(raw: str) -> list[dict]:
     return [
         {"role": "system", "content": (
-            "You convert raw resume text into structured JSON Resume data. "
-            "Extract only what is present; never invent. Use null/empty for "
-            "missing fields. Normalize dates to YYYY-MM."
+            "You convert raw resume text into a single JSON object using the "
+            "JSON Resume shape. Extract EVERY field that is present in the text: "
+            "the candidate's name (it is almost always the first non-empty line "
+            "at the top of the resume), label/title, email, phone, location, "
+            "links, a professional summary, ALL work experience entries (with "
+            "company, position, dates and every bullet under each job as a "
+            "highlight), all education, all skills (group skill keywords), all "
+            "projects, certifications, awards and languages. "
+            "Never invent facts, employers, dates or metrics that are not in the "
+            "text. Use empty string \"\" or empty array [] for anything missing, "
+            "never omit a section key. Normalize all dates to YYYY-MM (or YYYY "
+            "if only a year is given); use current:true and an empty endDate for "
+            "ongoing roles. Return ONLY the JSON object, no prose, no markdown. "
+            "The JSON's TOP-LEVEL keys must be basics, work, education, skills, etc. "
+            "Do NOT wrap the result in an outer key like \"resume\" or \"data\".\n\n"
+            "Target JSON shape (fill in real values, keep these keys):\n"
+            f"{_STRUCTURE_TARGET_SHAPE}\n\n"
+            f"{_STRUCTURE_EXAMPLE}"
         )},
-        {"role": "user", "content": f"Resume text:\n\n{raw}"},
+        {"role": "user", "content": f"Resume text to convert:\n\n{raw}"},
     ]
 
 

@@ -4,6 +4,18 @@ import pytest
 from apps.resumes import schema
 
 
+@pytest.fixture(autouse=True)
+def _force_mock_ai(settings):
+    """Make the whole suite hermetic: never call the real LLM API (even when a
+    key is set in .env). Forces the deterministic offline Mock provider."""
+    from apps.ai import provider
+
+    settings.OPENROUTER_API_KEY = ""
+    provider.reset_provider_cache()
+    yield
+    provider.reset_provider_cache()
+
+
 @pytest.fixture
 def strong_resume_data():
     """A complete, quantified, single-column-friendly resume."""

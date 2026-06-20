@@ -1,6 +1,5 @@
 {% load resume_extras %}
-{# Two-column creative layout (sidebar + main). Marked ats_safe=False in the
-   registry. Renders the same resume JSON as the single-column layout. #}
+{% comment %}Two-column creative layout (sidebar + main), ats_safe=False. Renders the same resume JSON as the single-column layout.{% endcomment %}
 <article class="rf-doc rf-two-col {{ meta.style_class }} rf-{{ meta.id }}" style="--accent: {{ meta.accent }}; --rf-font: {{ meta.font }};">
   <aside class="rf-side">
     {% with b=resume.data.basics %}

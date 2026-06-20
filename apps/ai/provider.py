@@ -24,8 +24,16 @@ class LLMProvider(abc.ABC):
     @abc.abstractmethod
     def structured(self, messages: list[dict], schema: dict, *,
                    temperature: float = 0.2, task: str | None = None,
-                   context: dict | None = None) -> dict:
-        """Return a JSON object conforming to ``schema``."""
+                   context: dict | None = None, strict: bool = True) -> dict:
+        """Return a JSON object.
+
+        When ``strict`` is True the provider may use a closed json_schema
+        response format (good for small, fully-specified schemas like the
+        bullets schema). When ``strict`` is False the provider should use plain
+        JSON-object mode and rely on the prompt + caller-side validation; this is
+        required for loose schemas (e.g. resume structuring) because strict
+        json_schema mode against an open schema makes some models emit only a
+        minimal subset of fields."""
 
 
 def is_demo_mode() -> bool:

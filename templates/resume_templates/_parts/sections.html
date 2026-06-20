@@ -1,6 +1,5 @@
 {% load resume_extras %}
-{# Reusable body sections (no header). Composed by every layout so content
-   stays identical across templates and only the chrome differs. #}
+{% comment %}Reusable body sections (no header), composed by every layout so content stays identical and only the chrome differs.{% endcomment %}
 {% if resume.data.basics.summary %}
 <section class="rf-section"><h2>Summary</h2><p class="rf-summary">{{ resume.data.basics.summary }}</p></section>
 {% endif %}
