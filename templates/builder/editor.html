@@ -2,7 +2,7 @@
 {% load static resume_extras %}
 
 {% block title %}Edit — {{ resume.title }}{% endblock %}
-{% block head_extra %}<link rel="stylesheet" href="{% static 'css/resume.css' %}">{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'css/resume.css' %}?v={{ ASSET_VERSION }}">{% endblock %}
 
 {% block content %}
 {{ resume.data|json_script:"resume-data" }}
@@ -79,4 +79,4 @@
 </div>
 {% endblock %}
 
-{% block body_extra %}<script src="{% static 'js/editor.js' %}"></script>{% endblock %}
+{% block body_extra %}<script src="{% static 'js/editor.js' %}?v={{ ASSET_VERSION }}"></script>{% endblock %}
