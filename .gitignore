@@ -1,9 +1,33 @@
-.code-review-graph/
-__pycache__/
-*.pyc
+# Secrets / local env (NEVER commit) — keep .env.example only
 .env
-db.sqlite3
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtualenv
 .venv/
-staticfiles/
-media/
+venv/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# Logs
+*.log
 runserver.log
+
+# Tooling / IDE / OS
+.code-review-graph/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
