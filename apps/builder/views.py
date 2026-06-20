@@ -101,7 +101,7 @@ def use_original(request, resume_id):
 
 
 def wizard(request, resume_id):
-    """Light intake: name, target role, experience level. Then to the editor."""
+    """Step 1: light intake (name, target role, level). Then -> template gallery."""
     resume = get_resume_or_404(request, resume_id)
     if request.method == "POST":
         name = request.POST.get("name", "").strip()[:120]
@@ -116,10 +116,12 @@ def wizard(request, resume_id):
         if role:
             resume.title = f"{role}"
         resume.save()
-        return redirect(edit_url(resume))
+        # Step 2 = pick a template, then the editor opens in that template.
+        return redirect(reverse("templates_engine:gallery", args=[resume.id]) + f"?t={resume.edit_token}")
     return render(request, "builder/wizard.html", {
         "resume": resume,
         "token": resume.edit_token,
         "edit_url": edit_url(resume),
+        "gallery_url": reverse("templates_engine:gallery", args=[resume.id]) + f"?t={resume.edit_token}",
         "levels": resume._meta.get_field("experience_level").choices,
     })

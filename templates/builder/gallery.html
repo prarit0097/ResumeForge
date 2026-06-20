@@ -5,10 +5,14 @@
 
 {% block content %}
 <div class="mx-auto max-w-6xl px-4 sm:px-6 py-6">
-  <div class="flex items-center justify-between mb-5">
-    <h1 class="font-display text-2xl font-semibold">Choose a template</h1>
-    <a href="{% url 'builder:editor' resume.id %}?t={{ token }}" class="text-sm text-brand hover:underline">← Back to editor</a>
+  <div class="flex items-center justify-between mb-2">
+    <div>
+      {% if is_sample %}<p class="text-sm font-medium text-brand">Step 2 of 2</p>{% endif %}
+      <h1 class="font-display text-2xl font-semibold">Choose a template</h1>
+    </div>
+    <a href="{% url 'builder:editor' resume.id %}?t={{ token }}" class="text-sm text-brand hover:underline">{% if is_sample %}Skip → editor{% else %}← Back to editor{% endif %}</a>
   </div>
+  <p class="text-sm text-slate-500 mb-5">Pick a look — you'll edit your content in it next. You can switch anytime.{% if is_sample %} <span class="text-slate-400">(previews show sample content)</span>{% endif %}</p>
 
   <div class="flex flex-wrap gap-2 mb-6">
     <a href="?t={{ token }}" class="rf-chip {% if not active_category %}rf-chip-on{% endif %}">All</a>
@@ -22,7 +26,7 @@
     <div class="rounded-xl border {% if t.id == current_id %}border-brand ring-2 ring-brand/30{% else %}border-slate-200{% endif %} bg-white overflow-hidden">
       <div class="relative h-56 overflow-hidden bg-slate-100 border-b border-slate-200">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 origin-top" style="transform: translateX(-50%) scale(0.34);">
-          {% include t.partial with resume=resume meta=t %}
+          {% include t.partial with resume=preview_obj meta=t %}
         </div>
         {% if t.ats_safe %}
         <span class="absolute top-2 right-2 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ATS-safe</span>
