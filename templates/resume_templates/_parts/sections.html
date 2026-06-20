@@ -1,0 +1,79 @@
+{% load resume_extras %}
+{# Reusable body sections (no header). Composed by every layout so content
+   stays identical across templates and only the chrome differs. #}
+{% if resume.data.basics.summary %}
+<section class="rf-section"><h2>Summary</h2><p class="rf-summary">{{ resume.data.basics.summary }}</p></section>
+{% endif %}
+
+{% if resume.data.work %}
+<section class="rf-section">
+  <h2>Work Experience</h2>
+  {% for job in resume.data.work %}
+  <div class="rf-entry">
+    <div class="rf-entry-head">
+      <span class="rf-entry-title">{{ job.position }}{% if job.company %} — {{ job.company }}{% endif %}</span>
+      <span class="rf-dates">{{ job.startDate }}{% if job.startDate or job.endDate or job.current %} – {% endif %}{% if job.current %}Present{% else %}{{ job.endDate }}{% endif %}</span>
+    </div>
+    {% if job.location %}<div class="rf-entry-sub">{{ job.location }}</div>{% endif %}
+    {% if job.summary %}<p class="rf-entry-summary">{{ job.summary }}</p>{% endif %}
+    {% if job.highlights %}<ul>{% for h in job.highlights %}{% if h %}<li>{{ h }}</li>{% endif %}{% endfor %}</ul>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if resume.data.projects %}
+<section class="rf-section">
+  <h2>Projects</h2>
+  {% for pr in resume.data.projects %}
+  <div class="rf-entry">
+    <div class="rf-entry-head"><span class="rf-entry-title">{{ pr.name }}</span></div>
+    {% if pr.description %}<p class="rf-entry-summary">{{ pr.description }}</p>{% endif %}
+    {% if pr.highlights %}<ul>{% for h in pr.highlights %}{% if h %}<li>{{ h }}</li>{% endif %}{% endfor %}</ul>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if resume.data.education %}
+<section class="rf-section">
+  <h2>Education</h2>
+  {% for ed in resume.data.education %}
+  <div class="rf-entry">
+    <div class="rf-entry-head">
+      <span class="rf-entry-title">{{ ed.studyType }}{% if ed.area %} in {{ ed.area }}{% endif %}</span>
+      <span class="rf-dates">{{ ed.startDate }}{% if ed.startDate or ed.endDate %} – {% endif %}{{ ed.endDate }}</span>
+    </div>
+    <div class="rf-entry-sub">{{ ed.institution }}{% if ed.score %} · {{ ed.score }}{% endif %}</div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if resume.data.skills %}
+<section class="rf-section"><h2>Skills</h2><p class="rf-skills">{{ resume.data.skills|skills_inline }}</p></section>
+{% endif %}
+
+{% if resume.data.certifications %}
+<section class="rf-section"><h2>Certifications</h2>
+  <ul>{% for c in resume.data.certifications %}<li>{{ c.name }}{% if c.issuer %} — {{ c.issuer }}{% endif %}{% if c.date %} ({{ c.date }}){% endif %}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+{% if resume.data.awards %}
+<section class="rf-section"><h2>Awards</h2>
+  <ul>{% for a in resume.data.awards %}<li>{{ a.title }}{% if a.awarder %} — {{ a.awarder }}{% endif %}{% if a.date %} ({{ a.date }}){% endif %}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+{% if resume.data.languages %}
+<section class="rf-section"><h2>Languages</h2>
+  <p class="rf-skills">{% for l in resume.data.languages %}{{ l.language }}{% if l.fluency %} ({{ l.fluency }}){% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+</section>
+{% endif %}
+
+{% for sec in resume.data.custom %}{% if sec.heading %}
+<section class="rf-section"><h2>{{ sec.heading }}</h2>
+  <ul>{% for item in sec.items %}{% if item %}<li>{{ item }}</li>{% endif %}{% endfor %}</ul>
+</section>
+{% endif %}{% endfor %}

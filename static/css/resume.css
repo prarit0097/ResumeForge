@@ -3,12 +3,13 @@
 
 .rf-doc {
   --accent: #4f46e5;
+  --rf-font: "Inter";
   --ink: #1a1a1a;
   --muted: #555;
   --rule: #d9d9d9;
   background: #fff;
   color: var(--ink);
-  font-family: "Inter", Arial, Helvetica, sans-serif;
+  font-family: var(--rf-font), Arial, Helvetica, sans-serif;
   font-size: 10.5pt;
   line-height: 1.42;
   width: 8.5in;
@@ -52,9 +53,48 @@
 .rf-doc li { margin-bottom: 2px; }
 .rf-skills { margin: 0; }
 
-/* Serif heading variant (executive) */
-.rf-executive .rf-name,
-.rf-executive .rf-section > h2 { font-family: "Fraunces", Georgia, serif; }
+/* ---- Style modifiers (multiply distinctness across templates) ---- */
+.rf-serif .rf-name,
+.rf-serif .rf-section > h2 { font-family: "Fraunces", Georgia, serif; }
+.rf-head-center .rf-head { text-align: center; }
+.rf-head-center .rf-contact span:first-child::before { content: ""; }
+.rf-rule-thin .rf-section > h2 { border-bottom-width: 0.75px; }
+.rf-rule-bold .rf-section > h2 {
+  border-bottom: none; background: var(--accent); color: #fff;
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+}
+.rf-airy .rf-section { margin-top: 20px; }
+.rf-airy .rf-entry { margin-bottom: 13px; }
+
+/* ---- Banner layout ---- */
+.rf-banner { padding: 0; }
+.rf-banner .rf-banner-head { background: var(--accent); color: #fff; padding: 0.45in 0.7in 0.35in; }
+.rf-banner .rf-banner-head .rf-name { color: #fff; }
+.rf-banner .rf-banner-head .rf-label { color: rgba(255,255,255,0.9); }
+.rf-banner .rf-banner-head .rf-contact { color: rgba(255,255,255,0.85); }
+.rf-banner .rf-banner-head .rf-contact span:not(:last-child)::after { color: rgba(255,255,255,0.5); }
+.rf-banner .rf-banner-body { padding: 0.3in 0.7in 0.6in; }
+
+/* ---- Compact layout ---- */
+.rf-compact { font-size: 9.7pt; line-height: 1.32; padding: 0.45in 0.6in; }
+.rf-compact .rf-name { font-size: 18pt; }
+.rf-compact .rf-section { margin-top: 9px; }
+.rf-compact .rf-entry { margin-bottom: 6px; }
+.rf-compact .rf-section > h2 { margin-bottom: 4px; }
+
+/* ---- Timeline layout (accent rail on headings) ---- */
+.rf-timeline .rf-section > h2 {
+  border-bottom: none; padding-left: 12px; position: relative;
+}
+.rf-timeline .rf-section > h2::before {
+  content: ""; position: absolute; left: 0; top: 1px; bottom: 1px;
+  width: 4px; background: var(--accent); border-radius: 2px;
+}
+
+/* ---- Right-sidebar variant of two-column ---- */
+.rf-two-col.rf-side-right { grid-template-columns: 1fr 2.3in; }
+.rf-two-col.rf-side-right .rf-side { order: 2; }
+.rf-two-col.rf-side-right .rf-main { order: 1; padding: 0.5in 0 0.5in 0.4in; }
 
 /* Two-column creative layout */
 .rf-two-col {

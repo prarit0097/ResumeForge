@@ -1,0 +1,9 @@
+{# Full-width accent banner header, then single-column body. ATS-safe (linear). #}
+<article class="rf-doc rf-single rf-banner {{ meta.style_class }} rf-{{ meta.id }}" style="--accent: {{ meta.accent }}; --rf-font: {{ meta.font }};">
+  <div class="rf-banner-head">
+    {% include "resume_templates/_parts/header.html" %}
+  </div>
+  <div class="rf-banner-body">
+    {% include "resume_templates/_parts/sections.html" %}
+  </div>
+</article>

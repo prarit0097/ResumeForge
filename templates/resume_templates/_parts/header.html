@@ -1,0 +1,14 @@
+{# Shared resume header (name, title, inline contact). #}
+{% with b=resume.data.basics %}
+<header class="rf-head">
+  <h1 class="rf-name">{{ b.name|default:"Your Name" }}</h1>
+  {% if b.label %}<p class="rf-label">{{ b.label }}</p>{% endif %}
+  <p class="rf-contact">
+    {% if b.email %}<span>{{ b.email }}</span>{% endif %}
+    {% if b.phone %}<span>{{ b.phone }}</span>{% endif %}
+    {% if b.location %}<span>{{ b.location }}</span>{% endif %}
+    {% if b.url %}<span>{{ b.url }}</span>{% endif %}
+    {% for p in b.profiles %}{% if p.url %}<span>{{ p.url }}</span>{% endif %}{% endfor %}
+  </p>
+</header>
+{% endwith %}
