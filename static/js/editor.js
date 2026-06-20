@@ -19,6 +19,23 @@ function resumeEditor(config) {
       this.$watch("title", () => this.queueSave());
       // Show the ATS health score immediately on open (esp. for enhanced resumes).
       this.refreshScore();
+      // Scale the preview to fit its column (no horizontal scrollbar).
+      this.fitPreview();
+      setTimeout(() => this.fitPreview(), 250);
+      window.addEventListener("resize", () => this.fitPreview());
+    },
+
+    fitPreview() {
+      const frame = document.querySelector(".rf-preview-frame");
+      const prev = document.getElementById("preview");
+      const doc = prev && prev.querySelector(".rf-doc");
+      if (!frame || !prev || !doc) return;
+      prev.style.transform = "none";
+      const avail = frame.clientWidth - 32; // frame padding (16px each side)
+      const scale = Math.min(1, avail / (doc.offsetWidth || 816));
+      prev.style.transformOrigin = "top left";
+      prev.style.transform = "scale(" + scale + ")";
+      prev.style.height = doc.offsetHeight * scale + "px";
     },
 
     queueSave() {
@@ -42,6 +59,7 @@ function resumeEditor(config) {
         const html = await res.text();
         const preview = document.getElementById("preview");
         if (preview) preview.innerHTML = html;
+        this.fitPreview();
         this.savedAt = new Date();
         this.refreshScore();
       } catch (e) {

@@ -3,49 +3,60 @@
 {% block title %}Your enhanced resume{% endblock %}
 {% block head_extra %}<link rel="stylesheet" href="{% static 'css/resume.css' %}">
 <style>
-  .cmp-frame { background:#eef2f7; border-radius:12px; padding:10px; height:560px; overflow:auto; }
-  .cmp-scale { transform: scale(0.48); transform-origin: top center; width: 8.5in; margin: 0 auto; }
-  .cmp-scale .rf-doc { box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+  /* Fit-to-width preview: the 8.5in resume is scaled by JS to fill its column,
+     so the WHOLE resume is visible with no horizontal slider. */
+  .cmp-stage { width:100%; overflow:hidden; border-radius:14px; background:#fff;
+               border:1px solid #e2e8f0; }
+  .cmp-stage .cmp-doc { transform-origin: top left; }
+  .cmp-stage .rf-doc { box-shadow:none; }
+  .cmp-after { box-shadow: 0 10px 40px rgba(16,185,129,.18); border-color:#6ee7b7; }
 </style>{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+<div class="mx-auto max-w-6xl px-4 sm:px-6 py-8"
+     x-data="{ view: 'after' }">
 
   <!-- Headline + score jump -->
   <div class="text-center">
     <p class="text-sm font-medium text-accent">✓ Resume enhanced</p>
     <h1 class="mt-1 font-display text-3xl sm:text-4xl font-semibold">Here's what we improved</h1>
-    <div class="mt-5 inline-flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+    <div class="mt-5 inline-flex items-center gap-5 rounded-2xl border border-slate-200 bg-white px-7 py-4 shadow-sm">
       <div class="text-center">
-        <div class="text-3xl font-bold text-slate-400">{{ before_score.score }}</div>
-        <div class="text-xs text-slate-500">Before</div>
+        <div class="text-4xl font-bold text-slate-400">{{ before_score.score }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">Before</div>
       </div>
-      <div class="text-2xl text-slate-300">→</div>
+      <div class="text-3xl text-slate-300">→</div>
       <div class="text-center">
-        <div class="text-3xl font-bold text-emerald-600">{{ after_score.score }}</div>
-        <div class="text-xs text-slate-500">After</div>
+        <div class="text-4xl font-bold text-emerald-600">{{ after_score.score }}</div>
+        <div class="text-xs text-slate-500 mt-0.5">After</div>
       </div>
       {% if summary.delta > 0 %}
-      <div class="ml-2 rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-sm font-semibold">+{{ summary.delta }} ATS points</div>
+      <div class="ml-1 rounded-full bg-emerald-50 text-emerald-700 px-3 py-1.5 text-sm font-semibold">+{{ summary.delta }} ATS points</div>
       {% endif %}
     </div>
   </div>
 
+  <!-- Mobile Before/After toggle -->
+  <div class="mt-6 flex lg:hidden justify-center gap-1 rounded-lg bg-slate-100 p-1 max-w-xs mx-auto">
+    <button @click="view='before'; $nextTick(() => requestAnimationFrame(window.fitAll))" :class="view==='before' ? 'bg-white shadow text-ink' : 'text-slate-500'" class="flex-1 rounded-md py-1.5 text-sm font-medium">Before</button>
+    <button @click="view='after'; $nextTick(() => requestAnimationFrame(window.fitAll))" :class="view==='after' ? 'bg-white shadow text-emerald-700' : 'text-slate-500'" class="flex-1 rounded-md py-1.5 text-sm font-medium">After ✨</button>
+  </div>
+
   <!-- Before / After previews -->
-  <div class="mt-8 grid lg:grid-cols-2 gap-6">
-    <div>
+  <div class="mt-5 grid lg:grid-cols-2 gap-6">
+    <div :class="view==='before' ? '' : 'hidden lg:block'">
       <div class="flex items-center justify-between mb-2">
         <h2 class="font-semibold text-slate-500">Before — your upload</h2>
         <span class="text-xs rounded-full bg-slate-100 text-slate-500 px-2 py-0.5">ATS {{ before_score.score }}/100</span>
       </div>
-      <div class="cmp-frame opacity-90"><div class="cmp-scale">{{ before_html|safe }}</div></div>
+      <div class="cmp-stage"><div class="cmp-doc">{{ before_html|safe }}</div></div>
     </div>
-    <div>
+    <div :class="view==='after' ? '' : 'hidden lg:block'">
       <div class="flex items-center justify-between mb-2">
-        <h2 class="font-semibold text-emerald-700">After — enhanced by ResumeForge ✨</h2>
+        <h2 class="font-semibold text-emerald-700">After — enhanced ✨ <span class="text-xs font-normal bg-emerald-50 text-emerald-700 rounded-full px-2 py-0.5 align-middle">Recommended</span></h2>
         <span class="text-xs rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5">ATS {{ after_score.score }}/100</span>
       </div>
-      <div class="cmp-frame ring-2 ring-emerald-300"><div class="cmp-scale">{{ after_html|safe }}</div></div>
+      <div class="cmp-stage cmp-after"><div class="cmp-doc">{{ after_html|safe }}</div></div>
     </div>
   </div>
 
@@ -56,7 +67,7 @@
       <ul class="mt-3 space-y-2">
         {% for item in summary.improvements %}
         <li class="flex items-start gap-2 text-sm text-slate-700">
-          <span class="mt-0.5 text-emerald-500 font-bold">✓</span><span>{{ item }}</span>
+          <span class="mt-0.5 text-emerald-500 font-bold shrink-0">✓</span><span>{{ item }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -66,7 +77,7 @@
       <ul class="mt-3 space-y-2">
         {% for item in summary.benefits %}
         <li class="flex items-start gap-2 text-sm text-slate-700">
-          <span class="mt-0.5 text-brand font-bold">→</span><span>{{ item }}</span>
+          <span class="mt-0.5 text-brand font-bold shrink-0">→</span><span>{{ item }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -76,15 +87,40 @@
   <!-- Actions -->
   <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
     <a href="{{ edit_url }}" class="w-full sm:w-auto text-center rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
-      Continue with the enhanced resume →
+      Continue editing the enhanced resume →
+    </a>
+    <a href="{% url 'exporting:download_menu' resume.id %}?t={{ token }}" class="w-full sm:w-auto text-center rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:border-brand">
+      Download now
     </a>
     <form method="post" action="{% url 'builder:use_original' resume.id %}?t={{ token }}" class="w-full sm:w-auto">
       {% csrf_token %}
-      <button class="w-full rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-600 hover:border-slate-400">
-        Keep my original instead
+      <button class="w-full rounded-lg px-4 py-3 text-sm font-medium text-slate-500 hover:text-slate-700">
+        Keep my original
       </button>
     </form>
   </div>
-  <p class="mt-3 text-center text-xs text-slate-400">You can keep editing either version — nothing is final until you download.</p>
+  <p class="mt-3 text-center text-xs text-slate-400">Nothing is final until you download — you can keep editing either version.</p>
 </div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+  // Scale each resume preview to exactly fill its column width (no horizontal
+  // slider), and size its box to the scaled height so the full resume shows.
+  function fitPreview(stage) {
+    if (!stage.clientWidth) return;                  // hidden (mobile toggle)
+    const doc = stage.querySelector('.cmp-doc');
+    const page = doc && doc.firstElementChild;       // the .rf-doc element
+    if (!page) return;
+    doc.style.transform = 'none';
+    const natW = page.offsetWidth || 816;
+    const scale = stage.clientWidth / natW;
+    doc.style.transform = 'scale(' + scale + ')';
+    stage.style.height = (page.offsetHeight * scale) + 'px';
+  }
+  window.fitAll = function () { document.querySelectorAll('.cmp-stage').forEach(fitPreview); };
+  window.addEventListener('load', function () { window.fitAll(); setTimeout(window.fitAll, 250); });
+  window.addEventListener('resize', window.fitAll);
+  document.addEventListener('alpine:initialized', () => setTimeout(window.fitAll, 50));
+</script>
 {% endblock %}
