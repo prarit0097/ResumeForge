@@ -55,4 +55,6 @@ def test_drafts_page_renders(client):
 def test_privacy_headers_present(client):
     resp = client.get("/")
     assert resp["X-Robots-Tag"].startswith("noindex")
-    assert resp["Referrer-Policy"] == "no-referrer"
+    # same-origin (not no-referrer): protects the token URL from external sites
+    # without breaking same-origin form POSTs (which no-referrer does via Origin: null).
+    assert resp["Referrer-Policy"] == "same-origin"
