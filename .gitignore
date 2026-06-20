@@ -1,0 +1,9 @@
+docs/superpowers/
+.code-review-graph/
+__pycache__/
+*.pyc
+.env
+db.sqlite3
+.venv/
+staticfiles/
+media/
