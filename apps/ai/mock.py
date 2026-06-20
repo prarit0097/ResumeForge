@@ -28,7 +28,8 @@ class MockProvider(LLMProvider):
         user_text = _strip(messages[-1]["content"]) if messages else ""
 
         if task == "improve_text":
-            return self._improve(user_text)
+            # Improve the candidate's actual text (in context), NOT the prompt.
+            return self._improve(_strip(context.get("text") or user_text))
         if task == "write_summary":
             return self._summary(context)
         if task == "cover_letter":
@@ -210,9 +211,9 @@ class MockProvider(LLMProvider):
         return re.sub(r"^[-*•‣▪⁃∙·]\s+", "", line).strip()
 
     _DATE_RANGE = re.compile(
-        r"(\b\w+\.?\s*\d{4}\b|\b\d{4}\b|present|current)"
-        r"\s*[-–to]+\s*"
-        r"(\b\w+\.?\s*\d{4}\b|\b\d{4}\b|present|current)",
+        r"((?:[A-Za-z]{3,9}\.?\s*)?\d{4}|present|current)"
+        r"\s*(?:-|–|—|to)\s*"
+        r"((?:[A-Za-z]{3,9}\.?\s*)?\d{4}|present|current)",
         re.I,
     )
 

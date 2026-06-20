@@ -12,8 +12,10 @@ from .constants import STOPWORDS
 # A compact curated taxonomy of common hard skills/tools. Matching against this
 # gives high-precision hard-skill detection independent of the LLM.
 HARD_SKILL_TAXONOMY = {
-    "python", "java", "javascript", "typescript", "c++", "c#", "go", "golang",
-    "rust", "ruby", "php", "swift", "kotlin", "scala", "r", "matlab",
+    # Bare "go"/"r" are intentionally excluded: they false-match common English
+    # words ("go far", "or"). "golang" covers Go.
+    "python", "java", "javascript", "typescript", "c++", "c#", "golang",
+    "rust", "ruby", "php", "swift", "kotlin", "scala", "matlab",
     "react", "angular", "vue", "svelte", "node", "nodejs", "django", "flask",
     "fastapi", "spring", "rails", ".net", "express", "next.js", "nextjs",
     "sql", "postgresql", "mysql", "mongodb", "redis", "elasticsearch",

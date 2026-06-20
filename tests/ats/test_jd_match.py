@@ -37,10 +37,12 @@ def test_weak_resume_misses_skills():
 
 
 def test_high_match_warns_about_over_optimization(strong_resume_data):
-    # Add every keyword to force a near-perfect match.
+    # Force a deterministic near-perfect match so the assertion is never vacuous.
     strong_resume_data["skills"].append(
-        {"name": "All", "keywords": ["communication", "teamwork", "Software Engineer"]})
-    strong_resume_data["basics"]["summary"] += " Bachelor degree. Software Engineer."
+        {"name": "All", "keywords": ["communication", "teamwork"]})
+    strong_resume_data["basics"]["summary"] += (
+        " Bachelor degree. Software Engineer with Python, JavaScript, Docker, "
+        "Kubernetes, AWS, SQL, communication and teamwork.")
     result = jd_match.score(strong_resume_data, JD)
-    if result["score"] >= 88:
-        assert any("over-optim" in w.lower() for w in result["warnings"])
+    assert result["score"] >= 88, f"expected near-perfect match, got {result['score']}"
+    assert any("over-optim" in w.lower() for w in result["warnings"])

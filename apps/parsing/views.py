@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
 
 from apps.resumes import services
-from core.access import cookie_name
+from core.access import set_token_cookie
 from core.sessions import ensure_session_key
 
 from . import extract, structure
@@ -38,8 +38,4 @@ def upload(request):
     )
     # Show the before/after comparison first (the value moment), not the editor.
     response = redirect(reverse("builder:compare", args=[resume.id]) + f"?t={resume.edit_token}")
-    response.set_cookie(
-        cookie_name(resume.id), resume.edit_token, max_age=60 * 60 * 24 * 90,
-        samesite="Lax", httponly=True,
-    )
-    return response
+    return set_token_cookie(response, resume)

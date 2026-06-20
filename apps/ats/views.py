@@ -65,16 +65,26 @@ def score(request, resume_id):
 def tailor(request, resume_id):
     """Rewrite summary + bullets toward the JD, save, and return new scores."""
     resume = get_resume_or_404(request, resume_id)
-    jd = (resume.job_description or "").strip()
+    jd = (resume.job_description or "").strip()[:8000]  # re-cap (cost guard)
     if not jd:
         return JsonResponse({"ok": False, "error": "Add a job description first."}, status=400)
 
+    # Bound total LLM calls per request: rewrite at most this many bullets.
+    MAX_BULLETS = 25
+    budget = MAX_BULLETS
     data = deepcopy(resume.data)
     basics = data.get("basics", {})
     if basics.get("summary"):
         basics["summary"] = ai_services.rewrite_to_jd(basics["summary"], jd)
     for job in data.get("work", []):
-        job["highlights"] = [ai_services.rewrite_to_jd(h, jd) for h in (job.get("highlights") or []) if h.strip()]
+        new_highlights = []
+        for h in (job.get("highlights") or []):
+            if h.strip() and budget > 0:
+                new_highlights.append(ai_services.rewrite_to_jd(h, jd))
+                budget -= 1
+            else:
+                new_highlights.append(h)
+        job["highlights"] = new_highlights
 
     resume_services.update_resume_data(resume, data)
     meta = registry.get(resume.template_id)

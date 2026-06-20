@@ -38,6 +38,7 @@ def generate(request, resume_id):
 
 
 @require_POST
+@ratelimit(key="ip", rate="60/m", block=True)
 def save(request, resume_id):
     resume = get_resume_or_404(request, resume_id)
     body = request.POST.get("body", "")[:20000]

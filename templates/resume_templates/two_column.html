@@ -76,5 +76,20 @@
       {% endfor %}
     </section>
     {% endif %}
+    {% if resume.data.certifications %}
+    <section class="rf-section"><h2>Certifications</h2>
+      <ul>{% for c in resume.data.certifications %}<li>{{ c.name }}{% if c.issuer %} — {{ c.issuer }}{% endif %}{% if c.date %} ({{ c.date }}){% endif %}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+    {% if resume.data.awards %}
+    <section class="rf-section"><h2>Awards</h2>
+      <ul>{% for a in resume.data.awards %}<li>{{ a.title }}{% if a.awarder %} — {{ a.awarder }}{% endif %}{% if a.date %} ({{ a.date }}){% endif %}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+    {% for sec in resume.data.custom %}{% if sec.heading %}
+    <section class="rf-section"><h2>{{ sec.heading }}</h2>
+      <ul>{% for item in sec.items %}{% if item %}<li>{{ item }}</li>{% endif %}{% endfor %}</ul>
+    </section>
+    {% endif %}{% endfor %}
   </div>
 </article>

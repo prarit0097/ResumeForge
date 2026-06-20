@@ -46,9 +46,19 @@ def enhance_resume_data(data: dict) -> dict:
 
     if isinstance(result, dict) and (_KNOWN & set(result.keys())):
         enhanced = schema.merge_into_resume(original, result)
-        if not schema.validate_resume_data(enhanced):
+        # Never let the model silently DROP jobs/education/projects. If it
+        # returned fewer items in any list section, fall back to local enhance.
+        if not schema.validate_resume_data(enhanced) and not _dropped_entries(original, enhanced):
             return enhanced
     return _local_enhance(original)
+
+
+def _dropped_entries(original: dict, enhanced: dict) -> bool:
+    """True if the enhanced resume has fewer entries in any list section."""
+    for key in ("work", "education", "projects", "certifications", "awards"):
+        if len(enhanced.get(key, [])) < len(original.get(key, [])):
+            return True
+    return False
 
 
 def _local_enhance(data: dict) -> dict:

@@ -11,15 +11,17 @@ PNG** files. No accounts, no watermarks, no paywall.
 
 ## Features
 
-- **Two flows:** build a new resume (guided wizard + AI) or upload & enhance an existing PDF/DOCX.
+- **Two flows:**
+  - **Build new:** guided intake (Step 1) → **pick a template** from 103 options with live sample previews (Step 2) → editor in that template.
+  - **Enhance existing:** upload a PDF/DOCX → AI parses + improves it in one pass → a **before/after comparison** showing the ATS-score jump, exactly what changed, and why it helps → continue editing or keep the original.
 - **AI content** (OpenRouter → DeepSeek): generate/improve bullets, write summaries, tailor to a job description, edit by prompt. Works in **offline demo mode** with no API key.
-- **Live ATS compatibility score** (0–100) with specific, actionable fixes.
+- **Live ATS compatibility score** (0–100) with specific, actionable fixes — shown the moment the editor opens.
 - **JD-match score** with an honest missing-keyword report and anti-stuffing warnings.
 - **One-click "Tailor to this job."**
-- **103 distinct templates** across 8 categories (ATS-safe single-column + creative two-column, each clearly labelled).
-- **Export:** text-selectable PDF, ATS-clean DOCX, PNG, and a "what the ATS sees" plain-text preview.
+- **103 distinct templates** across 8 categories (ATS-safe single-column + creative two-column, each clearly labelled). Every template renders the same data; switch anytime with no data loss.
+- **Export:** text-selectable PDF, ATS-clean DOCX, PNG, and a "what the ATS sees" plain-text preview. (PDF/PNG reuse a warm headless-Chromium per worker for fast repeat downloads.)
 - **Cover letter generator** + **tailored resume variants**.
-- Mobile-friendly, live preview, autosave, shareable resumable edit links — all without an account.
+- Mobile-friendly (fit-to-width previews), live preview, autosave, shareable resumable edit links — all without an account.
 
 ## Tech stack
 
@@ -95,7 +97,21 @@ templates/, static/
 ## Security notes
 
 - No user accounts. A resume is reached only via its unguessable UUID + secret
-  `edit_token` (constant-time compared). Resumes are `noindex` and send no referrer.
-- AI and export endpoints are rate-limited; uploads are type/size validated and parsed
-  in memory.
-- All config via environment; no secrets in code.
+  `edit_token` (constant-time compared). Resumes are `noindex`; `Referrer-Policy:
+  same-origin` keeps the token URL off external sites while keeping CSRF working.
+- Mutating + AI + export endpoints are rate-limited; uploads are type/size validated
+  and parsed in memory; AI inputs are length-capped (cost/prompt-injection guard).
+- Per-resume token cookies are `HttpOnly` (and `Secure` when not `DEBUG`); secure
+  cookies, HSTS and SSL-redirect activate automatically outside `DEBUG`.
+- All config via environment; no secrets in code; `SECRET_KEY` has no insecure default.
+
+### Before deploying to production (hardening checklist)
+
+- Set `DEBUG=False`, a real `SECRET_KEY`, and an explicit `ALLOWED_HOSTS`.
+- Self-host or pin-with-SRI the CDN scripts (Tailwind/htmx/Alpine) and add a
+  Content-Security-Policy; build Tailwind via CLI instead of the CDN.
+- Configure a Redis/memcached cache and a forwarded-IP resolver so `django-ratelimit`
+  works behind a reverse proxy.
+- Self-host the WOFF2 fonts (Inter/Fraunces) so PDF export needs no outbound network.
+- Run PDF/PNG export in a Celery worker (it's synchronous Chromium today).
+- **Rotate the OpenRouter key and `SECRET_KEY` if `.env` was ever shared.**

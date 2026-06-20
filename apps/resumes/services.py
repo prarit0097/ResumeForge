@@ -38,7 +38,11 @@ def list_session_resumes(session_key: str) -> QuerySet[Resume]:
 
 def update_resume_data(resume: Resume, incoming: dict) -> list[str]:
     """Validate + merge incoming sections into resume.data and save.
-    Returns validation errors (empty == saved). Immutable-style merge."""
+    Returns validation errors (empty == saved). Immutable-style merge.
+
+    UI-only fields prefixed with ``__`` (e.g. ``__jd`` for the target job
+    description) are never persisted into the stored resume document."""
+    incoming = {k: v for k, v in (incoming or {}).items() if not str(k).startswith("__")}
     merged = schema.merge_into_resume(resume.data, incoming)
     errors = schema.validate_resume_data(merged)
     if errors:

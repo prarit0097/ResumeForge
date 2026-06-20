@@ -5,26 +5,25 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
+from django_ratelimit.decorators import ratelimit
 
 from apps.resumes import services
 from apps.templates_engine import registry
-from core.access import cookie_name, edit_url, get_resume_or_404
+from core.access import edit_url, get_resume_or_404, set_token_cookie
 from core.sessions import ensure_session_key
 
 
+@ratelimit(key="ip", rate="30/m", block=True)
 def start_new(request):
     """Create a fresh draft for this device and send the user to the wizard."""
     session_key = ensure_session_key(request)
     resume = services.create_resume(session_key)
     response = redirect(reverse("builder:wizard", args=[resume.id]) + f"?t={resume.edit_token}")
-    response.set_cookie(
-        cookie_name(resume.id), resume.edit_token, max_age=60 * 60 * 24 * 90,
-        samesite="Lax", httponly=True,
-    )
-    return response
+    return set_token_cookie(response, resume)
 
 
 @require_POST
+@ratelimit(key="ip", rate="20/m", block=True)
 def create_variant(request, resume_id):
     """Make a tailored copy of a resume (for a specific job) and open it."""
     resume = get_resume_or_404(request, resume_id)
@@ -35,7 +34,9 @@ def create_variant(request, resume_id):
 def my_drafts(request):
     session_key = ensure_session_key(request)
     resumes = services.list_session_resumes(session_key).filter(parent__isnull=True)
-    return render(request, "builder/my_drafts.html", {"resumes": resumes})
+    response = render(request, "builder/my_drafts.html", {"resumes": resumes})
+    response["Cache-Control"] = "no-store"  # page contains secret edit tokens
+    return response
 
 
 EDITOR_TABS = [
@@ -100,6 +101,7 @@ def use_original(request, resume_id):
     return redirect(edit_url(resume))
 
 
+@ratelimit(key="ip", rate="60/m", method="POST", block=True)
 def wizard(request, resume_id):
     """Step 1: light intake (name, target role, level). Then -> template gallery."""
     resume = get_resume_or_404(request, resume_id)

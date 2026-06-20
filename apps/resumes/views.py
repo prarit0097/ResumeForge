@@ -51,6 +51,7 @@ def autosave(request, resume_id):
 
 
 @require_POST
+@ratelimit(key="ip", rate="60/m", block=True)
 def set_template(request, resume_id):
     """Switch the resume's template (no data loss). Redirects to the editor on a
     normal form POST; returns the new preview HTML for htmx/ajax callers."""

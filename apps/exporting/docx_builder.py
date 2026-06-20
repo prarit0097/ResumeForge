@@ -14,7 +14,7 @@ from docx.shared import Pt, RGBColor
 
 def _add_heading(doc, text: str, color: RGBColor) -> None:
     p = doc.add_paragraph()
-    p.space_before = Pt(8)
+    p.paragraph_format.space_before = Pt(8)
     run = p.add_run(text.upper())
     run.bold = True
     run.font.size = Pt(11)
@@ -106,6 +106,32 @@ def build_docx(data: dict, accent_hex: str = "4f46e5") -> bytes:
             line = " — ".join(filter(None, [c.get("name"), c.get("issuer"), c.get("date")]))
             if line:
                 doc.add_paragraph(line, style="List Bullet")
+
+    if data.get("awards"):
+        _add_heading(doc, "Awards", accent)
+        for a in data["awards"]:
+            line = " — ".join(filter(None, [a.get("title"), a.get("awarder"), a.get("date")]))
+            if line:
+                doc.add_paragraph(line, style="List Bullet")
+
+    if data.get("languages"):
+        _add_heading(doc, "Languages", accent)
+        parts = []
+        for lang in data["languages"]:
+            name = lang.get("language")
+            if not name:
+                continue
+            fluency = lang.get("fluency")
+            parts.append(f"{name} ({fluency})" if fluency else name)
+        if parts:
+            doc.add_paragraph("  ·  ".join(parts))
+
+    for sec in data.get("custom", []):
+        if sec.get("heading"):
+            _add_heading(doc, sec["heading"], accent)
+            for item in sec.get("items", []):
+                if item:
+                    doc.add_paragraph(item, style="List Bullet")
 
     buffer = io.BytesIO()
     doc.save(buffer)

@@ -12,7 +12,6 @@
         csrf: '{{ csrf_token }}',
         urls: {
           autosave: '{% url 'resumes:autosave' resume.id %}?t={{ token }}',
-          set_template: '{% url 'resumes:set_template' resume.id %}?t={{ token }}',
           gallery: '{% url 'templates_engine:gallery' resume.id %}?t={{ token }}',
           score: '{% url 'ats:score' resume.id %}?t={{ token }}',
           tailor: '{% url 'ats:tailor' resume.id %}?t={{ token }}',
@@ -45,7 +44,7 @@
 
   <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6">
     <!-- LEFT: form -->
-    <div>
+    <div class="min-w-0">
       <!-- tabs -->
       <div class="flex flex-wrap gap-1 mb-4 border-b border-slate-200">
         {% for key, label in tabs %}
@@ -64,13 +63,13 @@
     </div>
 
     <!-- RIGHT: live preview -->
-    <div class="lg:sticky lg:top-20 self-start w-full">
+    <div class="lg:sticky lg:top-20 self-start w-full min-w-0">
       <div class="flex items-center justify-between mb-2">
         <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Live preview</h2>
         <span class="text-xs text-slate-400">{{ template.name }}{% if not template.ats_safe %} · ⚠ creative{% endif %}</span>
       </div>
       <div class="rf-preview-frame" style="max-height: 78vh;">
-        <div id="preview" style="transform-origin: top center;">
+        <div id="preview">
           {% include template.partial with resume=resume meta=template %}
         </div>
       </div>

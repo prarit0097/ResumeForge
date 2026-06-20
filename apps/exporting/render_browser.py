@@ -40,11 +40,43 @@ def _document_html(resume) -> str:
     return render_resume_document(resume, inline_css=_resume_css())
 
 
+def _reset_local() -> None:
+    """Tear down this thread's Playwright fully before relaunching. Starting a
+    second sync_playwright on a thread whose loop is still alive is illegal and
+    permanently poisons the thread — so always stop the old one first."""
+    browser = getattr(_local, "browser", None)
+    if browser is not None:
+        try:
+            browser.close()
+        except Exception:  # noqa: BLE001
+            pass
+    pw = getattr(_local, "pw", None)
+    if pw is not None:
+        try:
+            pw.stop()
+        except Exception:  # noqa: BLE001
+            pass
+        if pw in _all_playwrights:
+            _all_playwrights.remove(pw)
+    _local.pw = None
+    _local.browser = None
+
+
 def _get_browser():
-    """Return this thread's live Chromium, launching it once on first use."""
+    """Return this thread's live Chromium, launching it once on first use. If the
+    browser died but the Playwright loop is alive, relaunch just the browser."""
+    pw = getattr(_local, "pw", None)
     browser = getattr(_local, "browser", None)
     if browser is not None and browser.is_connected():
         return browser
+    if pw is not None:
+        # Loop alive, browser dead -> relaunch only the browser (legal).
+        try:
+            _local.browser = pw.chromium.launch(args=_LAUNCH_ARGS)
+            return _local.browser
+        except Exception:  # noqa: BLE001 - loop is wedged; full reset below
+            _reset_local()
+
     from playwright.sync_api import sync_playwright
 
     pw = sync_playwright().start()
@@ -56,19 +88,27 @@ def _get_browser():
 
 def _render(html: str, fn):
     """Open a fresh page on the reused browser, run fn(page), always close page.
-    Recovers once if the persisted browser died."""
+    Recovers once if the persisted browser/loop died."""
     try:
         browser = _get_browser()
         page = browser.new_page()
-    except Exception:  # noqa: BLE001 - browser may have crashed; rebuild once
-        _local.browser = None
+    except Exception:  # noqa: BLE001 - rebuild from scratch once
+        _reset_local()
         browser = _get_browser()
         page = browser.new_page()
     try:
         page.set_content(html, wait_until="load")
+        # Give web fonts a brief chance to load for fidelity (best-effort).
+        try:
+            page.evaluate("document.fonts && document.fonts.ready")
+        except Exception:  # noqa: BLE001
+            pass
         return fn(page)
     finally:
-        page.close()
+        try:
+            page.close()
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def html_to_pdf(html: str) -> bytes:

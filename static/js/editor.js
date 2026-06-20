@@ -87,7 +87,7 @@ function resumeEditor(config) {
       skill.keywords = value.split(",").map((s) => s.trim()).filter(Boolean);
     },
 
-    // --- AI hooks (wired in Phase 4); no-ops until then ---
+    // --- AI hooks ---
     aiBusy: false,
     async aiImprove(path) {
       if (!this.urls.ai_improve) return;
