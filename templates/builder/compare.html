@@ -34,6 +34,15 @@
       <div class="ml-1 rounded-full bg-emerald-50 text-emerald-700 px-3 py-1.5 text-sm font-semibold">+{{ summary.delta }} ATS points</div>
       {% endif %}
     </div>
+    {% if match_after %}
+    <div class="mt-3 inline-flex items-center gap-3 rounded-xl border border-brand/30 bg-brand-soft/30 px-5 py-2.5 text-sm">
+      <span class="font-medium text-slate-600">🎯 Match to your target job:</span>
+      <span class="text-slate-400">{{ match_before.score }}%</span>
+      <span class="text-slate-300">→</span>
+      <span class="font-bold text-brand">{{ match_after.score }}%</span>
+      <span class="text-slate-500">tailored to the JD</span>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Mobile Before/After toggle -->

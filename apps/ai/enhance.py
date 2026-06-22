@@ -32,13 +32,14 @@ def _unwrap(result: dict) -> dict:
     return result
 
 
-def enhance_resume_data(data: dict) -> dict:
-    """Return an ATS-improved copy of ``data`` (never invents, never loses data)."""
+def enhance_resume_data(data: dict, jd: str | None = None) -> dict:
+    """Return an ATS-improved copy of ``data`` (never invents, never loses data).
+    When ``jd`` is given, tailor the result toward that job description."""
     original = deepcopy(data)
     try:
         result = _unwrap(get_provider().structured(
-            prompts.enhance_messages(original), _ENHANCE_SCHEMA,
-            task="enhance_resume", context={"data": original}, strict=False,
+            prompts.enhance_messages(original, jd), _ENHANCE_SCHEMA,
+            task="enhance_resume", context={"data": original, "jd": jd}, strict=False,
         ))
     except Exception:  # noqa: BLE001
         logger.exception("LLM enhance failed; using local fallback")

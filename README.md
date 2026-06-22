@@ -13,7 +13,7 @@ PNG** files. No accounts, no watermarks, no paywall.
 
 - **Two flows:**
   - **Build new:** guided intake (Step 1) → **pick a template** from 103 options with live sample previews (Step 2) → editor in that template.
-  - **Enhance existing:** upload a PDF/DOCX → AI parses + improves it in one pass → a **before/after comparison** showing the ATS-score jump, exactly what changed, and why it helps → continue editing or keep the original.
+  - **Enhance existing:** upload a PDF/DOCX (and, optionally, paste a **target job description**) → AI parses + improves it in one pass, **tailoring to the JD when given** (real skills only, never fabricated) → a **before/after comparison** showing the ATS-score jump, the JD-match jump, exactly what changed, and why it helps → continue editing or keep the original.
 - **AI content** (OpenRouter → DeepSeek): generate/improve bullets, write summaries, tailor to a job description, edit by prompt. Works in **offline demo mode** with no API key.
 - **Live ATS compatibility score** (0–100) with specific, actionable fixes — shown the moment the editor opens.
 - **JD-match score** with an honest missing-keyword report and anti-stuffing warnings.

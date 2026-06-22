@@ -89,16 +89,17 @@ def _coerce_to_resume(result: dict) -> dict:
     return safe
 
 
-def extract_and_enhance(raw_text: str) -> tuple[dict, dict]:
+def extract_and_enhance(raw_text: str, jd: str | None = None) -> tuple[dict, dict]:
     """ONE LLM call returning (original, enhanced) — halves the latency of the
-    enhance flow vs structuring then enhancing in two separate round-trips.
+    enhance flow vs structuring then enhancing in two separate round-trips. When
+    ``jd`` is given, the enhanced version is tailored to that job description.
 
     Falls back gracefully: if the combined call doesn't yield both, we structure
     once and enhance locally so the flow always produces a usable result."""
     try:
         result = get_provider().structured(
-            prompts.extract_and_enhance_messages(raw_text), _STRUCTURE_SCHEMA,
-            task="extract_and_enhance", context={"raw": raw_text}, strict=False,
+            prompts.extract_and_enhance_messages(raw_text, jd), _STRUCTURE_SCHEMA,
+            task="extract_and_enhance", context={"raw": raw_text, "jd": jd}, strict=False,
         )
     except Exception:  # noqa: BLE001
         logger.exception("Combined extract+enhance failed")
@@ -114,17 +115,16 @@ def extract_and_enhance(raw_text: str) -> tuple[dict, dict]:
         if isinstance(enh_raw, dict) and (_KNOWN_SECTIONS & set(enh_raw.keys())):
             enhanced = ai_enhance.ensure_ats_polish(_coerce_to_resume(_unwrap_envelope(enh_raw)))
         else:
-            enhanced = ai_enhance.enhance_resume_data(original)
+            enhanced = ai_enhance.enhance_resume_data(original, jd)
         return original, enhanced
 
     # Salvage: the model returned the resume at top level (no original/enhanced
-    # envelope). Use it as the faithful extraction and enhance from it — no need
-    # for a second extraction LLM round-trip.
+    # envelope). Use it as the faithful extraction and enhance from it.
     if isinstance(result, dict) and (_KNOWN_SECTIONS & set(result.keys())):
         original = _coerce_to_resume(_unwrap_envelope(result))
-        return original, ai_enhance.enhance_resume_data(original)
+        return original, ai_enhance.enhance_resume_data(original, jd)
 
     # Last resort: faithful structure (handles mock/offline), then enhance.
     original = to_resume_json(raw_text)
-    enhanced = ai_enhance.enhance_resume_data(original)
+    enhanced = ai_enhance.enhance_resume_data(original, jd)
     return original, enhanced

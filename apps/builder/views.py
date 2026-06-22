@@ -68,7 +68,7 @@ def compare(request, resume_id):
     """Before/after view for the enhance flow: original vs AI-enhanced, with the
     ATS score delta and a concrete list of improvements + benefits."""
     from apps.ai import enhance as ai_enhance
-    from apps.ats import compatibility
+    from apps.ats import compatibility, jd_match
     from apps.templates_engine.render import render_data_partial
 
     resume = get_resume_or_404(request, resume_id)
@@ -81,6 +81,11 @@ def compare(request, resume_id):
     summary = ai_enhance.summarize_improvements(
         original, enhanced, before["score"], after["score"])
 
+    # If the user supplied a target JD, show how the before/after match it.
+    jd = (resume.job_description or "").strip()
+    match_before = jd_match.score(original, jd) if jd else None
+    match_after = jd_match.score(enhanced, jd) if jd else None
+
     return render(request, "builder/compare.html", {
         "resume": resume,
         "token": resume.edit_token,
@@ -90,6 +95,8 @@ def compare(request, resume_id):
         "before_score": before,
         "after_score": after,
         "summary": summary,
+        "match_before": match_before,
+        "match_after": match_after,
         "template": meta,
     })
 

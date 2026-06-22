@@ -132,9 +132,25 @@ def structure_messages(raw: str) -> list[dict]:
     ]
 
 
-def extract_and_enhance_messages(raw: str) -> list[dict]:
+_JD_TAILOR_CLAUSE = (
+    " A TARGET JOB DESCRIPTION is provided below. Tailor ONLY the \"enhanced\" "
+    "version to it: surface and prioritize the experience, skills and keywords "
+    "most relevant to that job; mirror the job's important terminology WHERE THE "
+    "CANDIDATE GENUINELY HAS IT; and make sure the skills section covers the "
+    "job's key required skills that the candidate actually possesses. NEVER add "
+    "skills, tools or experience the candidate does not demonstrate — tailoring "
+    "means reframing real experience, not inventing it. The \"original\" stays a "
+    "faithful, untailored extraction."
+)
+
+
+def extract_and_enhance_messages(raw: str, jd: str | None = None) -> list[dict]:
     """One call that returns BOTH a faithful extraction and an ATS-improved
-    version — halves latency vs structuring then enhancing separately."""
+    version — halves latency vs structuring then enhancing separately. When a
+    job description is given, the enhanced version is tailored to it."""
+    user = f"Resume text:\n\n{raw}"
+    if jd:
+        user += f"\n\n--- TARGET JOB DESCRIPTION ---\n{jd}"
     return [
         {"role": "system", "content": (
             "You process a raw resume in ONE pass and return a JSON object with "
@@ -162,12 +178,16 @@ def extract_and_enhance_messages(raw: str) -> list[dict]:
             "description,highlights[]}], certifications[{name,issuer,date}], awards[], "
             "languages[{language,fluency}]. Return ONLY the JSON object {\"original\":"
             "{...},\"enhanced\":{...}}, no prose, no markdown."
+            + (_JD_TAILOR_CLAUSE if jd else "")
         )},
-        {"role": "user", "content": f"Resume text:\n\n{raw}"},
+        {"role": "user", "content": user},
     ]
 
 
-def enhance_messages(data: dict) -> list[dict]:
+def enhance_messages(data: dict, jd: str | None = None) -> list[dict]:
+    user = f"Resume JSON to improve:\n\n{data}"
+    if jd:
+        user += f"\n\n--- TARGET JOB DESCRIPTION (tailor toward this) ---\n{jd}"
     return [
         {"role": "system", "content": (
             "You are an expert ATS resume editor. You are given a resume as a JSON "
@@ -186,8 +206,9 @@ def enhance_messages(data: dict) -> list[dict]:
             "not implied. Do not add or remove jobs. Keep the same top-level keys "
             "(basics, work, education, skills, ...). Do NOT wrap the result in an "
             "outer key. Return ONLY the JSON object, no prose, no markdown."
+            + (_JD_TAILOR_CLAUSE if jd else "")
         )},
-        {"role": "user", "content": f"Resume JSON to improve:\n\n{data}"},
+        {"role": "user", "content": user},
     ]
 
 
