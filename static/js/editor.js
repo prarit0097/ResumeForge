@@ -23,6 +23,8 @@ function resumeEditor(config) {
       this.fitPreview();
       setTimeout(() => this.fitPreview(), 250);
       window.addEventListener("resize", () => this.fitPreview());
+      // Put the cursor in the first field so "start here" is unmistakable.
+      if (this.isEmptyResume) this.$nextTick(() => this.focusFirstField());
     },
 
     fitPreview() {
@@ -66,6 +68,51 @@ function resumeEditor(config) {
         this.saveError = "Network error while saving.";
       } finally {
         this.saving = false;
+      }
+    },
+
+    // --- onboarding / guided progress ---
+    guideDismissed: false,
+    STEPS: [
+      { key: "basics", label: "Your details", hint: "Name, email, phone & a short summary" },
+      { key: "work", label: "Work experience", hint: "Add roles — let AI write the bullets" },
+      { key: "education", label: "Education", hint: "Degree, school & dates" },
+      { key: "skills", label: "Skills", hint: "6+ keywords recruiters search for" },
+    ],
+    sectionDone(key) {
+      const d = this.data || {};
+      if (key === "basics") return !!((d.basics || {}).name && (d.basics || {}).email);
+      if (key === "work") return (d.work || []).some((w) => w.position || w.company);
+      if (key === "education") return (d.education || []).some((e) => e.institution || e.studyType);
+      if (key === "skills") return (d.skills || []).some((s) => (s.keywords || []).length);
+      return false;
+    },
+    get completedCount() { return this.STEPS.filter((s) => this.sectionDone(s.key)).length; },
+    get progressPct() { return Math.round((this.completedCount / this.STEPS.length) * 100); },
+    get nextStep() { return this.STEPS.find((s) => !this.sectionDone(s.key)) || null; },
+    get showGuide() { return !this.guideDismissed && this.completedCount < this.STEPS.length; },
+    get isEmptyResume() {
+      const b = this.data.basics || {};
+      return !b.name && !b.summary && !(this.data.work || []).length;
+    },
+    goToStep(key) {
+      this.activeTab = key;
+      // Make the next action ready: if a list section is empty, create the first
+      // entry so the user lands on fields to fill, not a lone "+ Add" button.
+      if (key === "work" && !(this.data.work || []).length) this.addWork();
+      if (key === "education" && !(this.data.education || []).length) this.addEducation();
+      if (key === "skills" && !(this.data.skills || []).length) this.addSkill();
+      this.scrollFormTop();
+      this.$nextTick(() => this.focusFirstField());
+    },
+    scrollFormTop() {
+      const el = document.getElementById("editor-form-top");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    focusFirstField() {
+      // Focus the first VISIBLE input in the active form section.
+      for (const el of document.querySelectorAll("section input, section textarea")) {
+        if (el.offsetParent !== null) { el.focus(); break; }
       }
     },
 

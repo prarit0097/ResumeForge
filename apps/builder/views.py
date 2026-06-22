@@ -43,8 +43,8 @@ def my_drafts(request):
 
 
 EDITOR_TABS = [
-    ("basics", "Basics"),
-    ("work", "Experience"),
+    ("basics", "Your details"),
+    ("work", "Work experience"),
     ("education", "Education"),
     ("skills", "Skills"),
     ("more", "More"),

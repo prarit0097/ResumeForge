@@ -5,11 +5,11 @@
     <button type="button" @click="refreshScore()" class="text-sm text-brand hover:underline">Re-check</button>
   </div>
 
-  <template x-if="!score">
-    <p class="text-sm text-slate-400 mt-2">Start filling in your resume to see your live ATS score.</p>
+  <template x-if="!score || isEmptyResume">
+    <p class="text-sm text-slate-500 mt-2">Fill in your details and add experience to see your live ATS score — it climbs as you complete each section.</p>
   </template>
 
-  <template x-if="score">
+  <template x-if="score && !isEmptyResume">
     <div class="mt-3 space-y-3">
       <div class="flex items-center gap-4">
         <div class="text-3xl font-bold" :class="score.score >= 80 ? 'text-emerald-600' : score.score >= 60 ? 'text-amber-500' : 'text-red-500'"

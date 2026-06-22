@@ -42,15 +42,74 @@
     </div>
   </div>
 
+  <!-- Onboarding guide: what to do next (auto-hides as the resume fills in) -->
+  <div x-show="showGuide" x-transition x-cloak
+       class="mb-5 rounded-2xl border border-brand/30 bg-gradient-to-br from-brand-soft/50 to-white p-5">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 class="font-display text-lg font-semibold">Let's build your resume 👇</h2>
+        <p class="text-sm text-slate-600" x-show="nextStep">
+          Next: <span class="font-medium text-brand" x-text="nextStep.label"></span> — <span x-text="nextStep.hint"></span>.
+          Fill the form; your resume updates live as you type.
+        </p>
+      </div>
+      <button @click="guideDismissed = true" aria-label="Hide onboarding guide"
+              class="text-slate-400 hover:text-slate-600 text-sm shrink-0">Hide ✕</button>
+    </div>
+    <!-- progress bar -->
+    <div class="mt-3 flex items-center gap-3">
+      <div class="h-2 flex-1 rounded-full bg-white overflow-hidden border border-slate-200">
+        <div class="h-full bg-gradient-to-r from-brand to-accent transition-all" :style="`width:${progressPct}%`"></div>
+      </div>
+      <span class="text-xs font-semibold text-slate-500" x-text="completedCount + '/' + STEPS.length"></span>
+    </div>
+    <!-- primary next-step button -->
+    <button x-show="nextStep" @click="goToStep(nextStep.key)"
+            class="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark">
+      Start with <span x-text="nextStep.label"></span> →
+    </button>
+    <!-- step chips (jump to any section) -->
+    <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <template x-for="step in STEPS" :key="step.key">
+        <button @click="goToStep(step.key)"
+                :class="sectionDone(step.key) ? 'border-accent bg-emerald-50 text-emerald-800' : (activeTab===step.key ? 'border-brand text-brand' : 'border-slate-200 text-slate-600 hover:border-brand')"
+                class="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm text-left">
+          <span class="h-5 w-5 shrink-0 grid place-items-center rounded-full text-[11px] text-white"
+                :class="sectionDone(step.key) ? 'bg-accent' : 'bg-slate-300'"
+                x-text="sectionDone(step.key) ? '✓' : (STEPS.indexOf(step)+1)"></span>
+          <span x-text="step.label"></span>
+        </button>
+      </template>
+    </div>
+    <p class="mt-3 text-xs text-slate-500" x-show="activeTab==='work' || activeTab==='basics'">💡 Tip: in Work experience, click <span class="font-medium">✨ Suggest bullets</span> to let AI write your achievements. Paste a job description in <span class="font-medium">More</span> to tailor everything.</p>
+  </div>
+
+  <!-- Success state: all sections done -> nudge to download -->
+  <div x-show="completedCount === STEPS.length && !guideDismissed" x-transition x-cloak
+       class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h2 class="font-display text-lg font-semibold text-emerald-800">🎉 Your resume is ready!</h2>
+      <p class="text-sm text-emerald-700">All sections complete. Download it, or paste a job description in <span class="font-medium">More</span> to tailor it.</p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <a href="{% url 'exporting:download_menu' resume.id %}?t={{ token }}" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Download →</a>
+      <button @click="guideDismissed = true" aria-label="Hide" class="text-emerald-700/70 hover:text-emerald-800 text-sm">Hide ✕</button>
+    </div>
+  </div>
+
   <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6">
     <!-- LEFT: form -->
     <div class="min-w-0">
+      <span id="editor-form-top"></span>
       <!-- tabs -->
       <div class="flex flex-wrap gap-1 mb-4 border-b border-slate-200">
         {% for key, label in tabs %}
         <button @click="activeTab='{{ key }}'"
                 :class="activeTab==='{{ key }}' ? 'border-brand text-brand' : 'border-transparent text-slate-500'"
-                class="px-3 py-2 text-sm font-medium border-b-2 -mb-px">{{ label }}</button>
+                class="px-3 py-2 text-sm font-medium border-b-2 -mb-px flex items-center gap-1.5">
+          {{ label }}
+          <span x-show="sectionDone('{{ key }}')" class="h-1.5 w-1.5 rounded-full bg-accent" title="Done"></span>
+        </button>
         {% endfor %}
       </div>
 
@@ -68,9 +127,16 @@
         <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Live preview</h2>
         <span class="text-xs text-slate-400">{{ template.name }}{% if not template.ats_safe %} · ⚠ creative{% endif %}</span>
       </div>
-      <div class="rf-preview-frame" style="max-height: 78vh;">
+      <div class="rf-preview-frame relative" style="max-height: 78vh;">
         <div id="preview">
           {% include template.partial with resume=resume meta=template %}
+        </div>
+        <!-- friendly hint while the resume is still empty -->
+        <div x-show="isEmptyResume" x-cloak
+             class="pointer-events-none absolute inset-x-0 top-24 flex flex-col items-center text-center px-6">
+          <div class="text-4xl">📝</div>
+          <p class="mt-2 font-medium text-slate-500">Your resume appears here, live</p>
+          <p class="text-sm text-slate-400">Start with your details on the left — every change shows up instantly.</p>
         </div>
       </div>
     </div>
