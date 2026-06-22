@@ -20,6 +20,21 @@ def test_wizard_post_persists_and_redirects_to_gallery(client):
     assert r.experience_level == "mid"
 
 
+def test_wizard_prefills_saved_level_so_resubmit_keeps_it(client):
+    r = services.create_resume("s")
+    # First submit sets senior.
+    client.post(f"/r/{r.id}/wizard/?t={r.edit_token}", data={
+        "name": "X", "target_role": "Dev", "experience_level": "senior"})
+    # Re-open the wizard: the saved level must be pre-checked (not reset to entry).
+    page = client.get(f"/r/{r.id}/wizard/?t={r.edit_token}").content.decode()
+    senior_idx = page.find('value="senior"')
+    assert senior_idx != -1
+    # The 'senior' radio carries `checked`; the first (entry) radio does not.
+    assert "checked" in page[senior_idx:senior_idx + 120]
+    entry_idx = page.find('value="entry"')
+    assert "checked" not in page[entry_idx:entry_idx + 120]
+
+
 def test_wizard_rejects_invalid_experience_level(client):
     r = services.create_resume("s")
     client.post(f"/r/{r.id}/wizard/?t={r.edit_token}", data={

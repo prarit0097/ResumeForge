@@ -7,7 +7,7 @@ pytestmark = pytest.mark.django_db
 
 
 def _new_resume(client):
-    start = client.get("/new/")
+    start = client.post("/new/")
     loc = start["Location"]
     rid = loc.split("/r/")[1].split("/")[0]
     token = loc.split("t=")[1]

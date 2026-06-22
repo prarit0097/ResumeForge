@@ -5,6 +5,7 @@ from __future__ import annotations
 import hmac
 from copy import deepcopy
 
+from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 
 from . import schema
@@ -22,7 +23,8 @@ def get_resume(resume_id, edit_token: str) -> Resume | None:
         return None
     try:
         resume = Resume.objects.get(pk=resume_id)
-    except (Resume.DoesNotExist, ValueError, TypeError):
+    except (Resume.DoesNotExist, ValueError, TypeError, ValidationError):
+        # ValidationError: a malformed (non-UUID) pk -> treat as not found, not 500.
         return None
     if not hmac.compare_digest(str(resume.edit_token), str(edit_token)):
         return None

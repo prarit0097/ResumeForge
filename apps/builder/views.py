@@ -13,9 +13,12 @@ from core.access import edit_url, get_resume_or_404, set_token_cookie
 from core.sessions import ensure_session_key
 
 
+@require_POST
 @ratelimit(key="ip", rate="30/m", block=True)
 def start_new(request):
-    """Create a fresh draft for this device and send the user to the wizard."""
+    """Create a fresh draft for this device and send the user to the wizard.
+    POST-only: a state-changing GET would let prefetchers/crawlers create orphan
+    drafts on every speculative hit."""
     session_key = ensure_session_key(request)
     resume = services.create_resume(session_key)
     response = redirect(reverse("builder:wizard", args=[resume.id]) + f"?t={resume.edit_token}")

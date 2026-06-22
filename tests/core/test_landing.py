@@ -12,15 +12,17 @@ def test_landing_has_both_doors(client):
     assert "Enhance an existing" in body
 
 
-def test_start_new_creates_and_redirects(client):
-    resp = client.get("/new/")
+def test_start_new_is_post_only(client):
+    # GET must NOT create a draft (prefetch-safe); only POST does.
+    assert client.get("/new/").status_code == 405
+    resp = client.post("/new/")
     assert resp.status_code == 302
     assert "/wizard/" in resp["Location"]
 
 
 def test_editor_requires_valid_token(client):
     # Start a draft, capture its edit URL, then verify a bad token 404s.
-    start = client.get("/new/")
+    start = client.post("/new/")
     wizard_url = start["Location"]
     resume_id = wizard_url.split("/r/")[1].split("/")[0]
     ok = client.get(f"/r/{resume_id}/edit/?t=" + wizard_url.split("t=")[1])

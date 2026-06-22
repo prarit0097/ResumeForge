@@ -22,6 +22,7 @@ def _filename(resume, ext: str) -> str:
     return f"{slug}_resume.{ext}"
 
 
+@ratelimit(key="ip", rate="60/m", block=True)
 def download_menu(request, resume_id):
     resume = get_resume_or_404(request, resume_id)
     return render(request, "exporting/download_menu.html", {

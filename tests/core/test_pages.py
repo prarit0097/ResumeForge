@@ -5,7 +5,7 @@ pytestmark = pytest.mark.django_db
 
 
 def _new(client):
-    loc = client.get("/new/")["Location"]
+    loc = client.post("/new/")["Location"]
     rid = loc.split("/r/")[1].split("/")[0]
     token = loc.split("t=")[1]
     return rid, token
@@ -47,7 +47,7 @@ def test_cover_letter_page_renders(client):
 
 
 def test_drafts_page_renders(client):
-    client.get("/new/")  # create a draft on this session
+    client.post("/new/")  # create a draft on this session
     resp = client.get("/drafts/")
     assert resp.status_code == 200
 

@@ -31,3 +31,5 @@ runserver.log
 .vscode/
 .DS_Store
 Thumbs.db
+_live_walkthrough.py
+_*.py

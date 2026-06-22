@@ -294,10 +294,14 @@ class MockProvider(LLMProvider):
         keywords: list[str] = []
         for line in lines:
             line = self._strip_bullet(line) if self._is_bullet(line) else line
-            # Strip a leading "Category:" label, keep the values.
-            if ":" in line:
+            # Strip a leading "Category:" label only when the prefix really looks
+            # like a short label (not a URL like "see https://...").
+            prefix = line.split(":", 1)[0]
+            if ":" in line and re.fullmatch(r"[A-Za-z][\w &-]{0,24}", prefix.strip()):
                 line = line.split(":", 1)[1]
-            for kw in re.split(r"[,/|•]", line):
+            # Split on commas/pipes/bullets only — NOT "/", so CI/CD, TCP/IP and
+            # URLs survive intact.
+            for kw in re.split(r"[,|•]", line):
                 kw = kw.strip()
                 if kw and kw not in keywords:
                     keywords.append(kw)

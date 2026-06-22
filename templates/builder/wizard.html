@@ -11,18 +11,20 @@
     {% csrf_token %}
     <label class="block">
       <span class="rf-lbl">Your name</span>
-      <input class="rf-in" name="name" placeholder="Jane Doe" autofocus>
+      <input class="rf-in" name="name" placeholder="Jane Doe" autofocus value="{{ resume.data.basics.name }}">
     </label>
     <label class="block">
       <span class="rf-lbl">Target role</span>
-      <input class="rf-in" name="target_role" placeholder="Senior Software Engineer">
+      <input class="rf-in" name="target_role" placeholder="Senior Software Engineer" value="{{ resume.target_role }}">
     </label>
     <fieldset>
       <span class="rf-lbl">Experience level</span>
       <div class="grid grid-cols-2 gap-2 mt-1">
         {% for value, label in levels %}
         <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-brand">
-          <input type="radio" name="experience_level" value="{{ value }}" {% if forloop.first %}checked{% endif %}>
+          {# Pre-check the saved level; only default to the first option when none is set yet. #}
+          <input type="radio" name="experience_level" value="{{ value }}"
+                 {% if resume.experience_level == value or not resume.experience_level and forloop.first %}checked{% endif %}>
           <span class="text-sm">{{ label }}</span>
         </label>
         {% endfor %}

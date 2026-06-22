@@ -47,5 +47,6 @@ def save(request, resume_id):
         letter.body = body
         letter.save(update_fields=["body", "updated_at"])
     else:
-        CoverLetter.objects.create(resume=resume, body=body)
+        CoverLetter.objects.create(
+            resume=resume, body=body, job_description=resume.job_description)
     return redirect(f"/r/{resume.id}/cover-letter/?t={resume.edit_token}")

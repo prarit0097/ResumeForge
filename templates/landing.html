@@ -23,15 +23,19 @@
     </p>
 
     <div class="mt-8 grid gap-4 sm:grid-cols-2 max-w-2xl">
-      <a href="{% url 'builder:start_new' %}"
-         class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand transition">
-        <div class="flex items-center justify-between">
-          <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-brand-soft text-brand text-lg">✍️</span>
-          <span class="text-slate-300 group-hover:text-brand transition">→</span>
-        </div>
-        <h2 class="mt-4 font-display text-xl font-semibold">Build a new resume</h2>
-        <p class="mt-1 text-sm text-slate-600">Answer a few prompts. AI drafts strong, quantified bullets for you.</p>
-      </a>
+      {# POST (not a link) so prefetchers/crawlers can't create orphan drafts. #}
+      <form method="post" action="{% url 'builder:start_new' %}">
+        {% csrf_token %}
+        <button type="submit"
+           class="group w-full text-left rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand transition">
+          <div class="flex items-center justify-between">
+            <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-brand-soft text-brand text-lg">✍️</span>
+            <span class="text-slate-300 group-hover:text-brand transition">→</span>
+          </div>
+          <h2 class="mt-4 font-display text-xl font-semibold">Build a new resume</h2>
+          <p class="mt-1 text-sm text-slate-600">Answer a few prompts. AI drafts strong, quantified bullets for you.</p>
+        </button>
+      </form>
 
       <a href="{% url 'parsing:upload' %}"
          class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-accent transition">

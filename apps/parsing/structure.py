@@ -104,6 +104,8 @@ def extract_and_enhance(raw_text: str) -> tuple[dict, dict]:
         logger.exception("Combined extract+enhance failed")
         result = {}
 
+    from apps.ai import enhance as ai_enhance
+
     orig_raw = result.get("original") if isinstance(result, dict) else None
     enh_raw = result.get("enhanced") if isinstance(result, dict) else None
 
@@ -112,13 +114,17 @@ def extract_and_enhance(raw_text: str) -> tuple[dict, dict]:
         if isinstance(enh_raw, dict) and (_KNOWN_SECTIONS & set(enh_raw.keys())):
             enhanced = _coerce_to_resume(_unwrap_envelope(enh_raw))
         else:
-            enhanced = original
+            enhanced = ai_enhance.enhance_resume_data(original)
         return original, enhanced
 
-    # Fallback: faithful structure (handles mock/offline + odd responses), then
-    # enhance separately.
-    from apps.ai import enhance as ai_enhance
+    # Salvage: the model returned the resume at top level (no original/enhanced
+    # envelope). Use it as the faithful extraction and enhance from it — no need
+    # for a second extraction LLM round-trip.
+    if isinstance(result, dict) and (_KNOWN_SECTIONS & set(result.keys())):
+        original = _coerce_to_resume(_unwrap_envelope(result))
+        return original, ai_enhance.enhance_resume_data(original)
 
+    # Last resort: faithful structure (handles mock/offline), then enhance.
     original = to_resume_json(raw_text)
     enhanced = ai_enhance.enhance_resume_data(original)
     return original, enhanced

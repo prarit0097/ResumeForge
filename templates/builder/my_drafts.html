@@ -5,7 +5,7 @@
 <div class="mx-auto max-w-3xl px-4 sm:px-6 py-10">
   <div class="flex items-center justify-between mb-6">
     <h1 class="font-display text-2xl font-semibold">Drafts on this device</h1>
-    <a href="{% url 'builder:start_new' %}" class="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark">+ New resume</a>
+    <form method="post" action="{% url 'builder:start_new' %}" class="inline">{% csrf_token %}<button type="submit" class="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark">+ New resume</button></form>
   </div>
 
   {% if resumes %}
@@ -24,7 +24,7 @@
   {% else %}
   <div class="rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
     <p>No drafts yet on this device.</p>
-    <a href="{% url 'builder:start_new' %}" class="mt-3 inline-block text-brand font-medium hover:underline">Build your first resume →</a>
+    <form method="post" action="{% url 'builder:start_new' %}" class="mt-3 inline-block">{% csrf_token %}<button type="submit" class="text-brand font-medium hover:underline">Build your first resume →</button></form>
   </div>
   {% endif %}
 </div>

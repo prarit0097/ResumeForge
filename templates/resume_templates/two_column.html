@@ -41,7 +41,7 @@
       <div class="rf-entry">
         <div class="rf-entry-head">
           <span class="rf-entry-title">{{ job.position }}{% if job.company %} — {{ job.company }}{% endif %}</span>
-          <span class="rf-dates">{{ job.startDate }}{% if job.startDate or job.endDate or job.current %} – {% endif %}{% if job.current %}Present{% else %}{{ job.endDate }}{% endif %}</span>
+          <span class="rf-dates">{{ job.startDate }}{% if job.startDate and job.endDate or job.startDate and job.current %} – {% endif %}{% if job.current %}Present{% else %}{{ job.endDate }}{% endif %}</span>
         </div>
         {% if job.location %}<div class="rf-entry-sub">{{ job.location }}</div>{% endif %}
         {% if job.summary %}<p class="rf-entry-summary">{{ job.summary }}</p>{% endif %}
@@ -69,7 +69,7 @@
       <div class="rf-entry">
         <div class="rf-entry-head">
           <span class="rf-entry-title">{{ ed.studyType }}{% if ed.area %} in {{ ed.area }}{% endif %}</span>
-          <span class="rf-dates">{{ ed.startDate }}{% if ed.startDate or ed.endDate %} – {% endif %}{{ ed.endDate }}</span>
+          <span class="rf-dates">{{ ed.startDate }}{% if ed.startDate and ed.endDate %} – {% endif %}{{ ed.endDate }}</span>
         </div>
         <div class="rf-entry-sub">{{ ed.institution }}{% if ed.score %} · {{ ed.score }}{% endif %}</div>
       </div>

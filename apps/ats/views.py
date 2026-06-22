@@ -86,7 +86,9 @@ def tailor(request, resume_id):
                 new_highlights.append(h)
         job["highlights"] = new_highlights
 
-    resume_services.update_resume_data(resume, data)
+    errors = resume_services.update_resume_data(resume, data)
+    if errors:
+        return JsonResponse({"ok": False, "error": "Could not save the tailored resume."}, status=400)
     meta = registry.get(resume.template_id)
     return JsonResponse({
         "ok": True,
