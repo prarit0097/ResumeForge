@@ -74,10 +74,44 @@ def _skill_count(data: dict) -> int:
               for s in data.get("skills", []))
 
 
+_NOTE_RE = re.compile(r"\s*[\*]*\(?\s*note\s*:.*$", re.I | re.S)
+
+
+def _clean_text(s: str) -> str:
+    """Strip LLM artifacts that sometimes leak into bullets/summaries: wrapping
+    quotes, markdown asterisks, and parenthetical '(Note: …)' commentary."""
+    s = (s or "").strip()
+    if not s:
+        return s
+    s = _NOTE_RE.sub("", s).strip()                 # drop trailing "(Note: …)" notes
+    s = re.sub(r"\*?\([^)]*\bnote\b[^)]*\)\*?", "", s, flags=re.I)  # inline notes
+    s = s.replace("**", "").strip()
+    # strip wrapping quotes (straight + curly), possibly several layers
+    while len(s) >= 2 and s[0] in "\"'“”‘’" and s[-1] in "\"'“”‘’":
+        s = s[1:-1].strip()
+    s = s.strip("*").strip()
+    s = re.sub(r"\s{2,}", " ", s).strip()
+    return s.strip(" \"'“”")
+
+
+def _sanitize_in_place(data: dict) -> None:
+    b = data.get("basics", {})
+    if b.get("summary"):
+        b["summary"] = _clean_text(b["summary"])
+    for section in ("work", "projects"):
+        for entry in data.get(section, []):
+            if entry.get("summary"):
+                entry["summary"] = _clean_text(entry["summary"])
+            entry["highlights"] = [_clean_text(h) for h in (entry.get("highlights") or []) if _clean_text(h)]
+
+
 def ensure_ats_polish(data: dict) -> dict:
-    """Guarantee a Skills section (the biggest ATS-compatibility lever) when the
-    resume clearly has skills in its content but no skills section. Never
+    """Clean LLM artifacts, then guarantee a Skills section (the biggest ATS
+    lever) when the resume clearly has skills but no skills section. Never
     fabricates — only surfaces skills already present in titles/summary/bullets."""
+    data = deepcopy(data)
+    _sanitize_in_place(data)
+
     if _skill_count(data) >= 6:
         return data
 

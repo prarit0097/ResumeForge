@@ -68,6 +68,26 @@ def test_ensure_ats_polish_adds_skills_and_lifts_score():
     assert after > before and after >= 95
 
 
+def test_sanitizer_strips_llm_artifacts():
+    from apps.ai.enhance import _clean_text
+    assert _clean_text('"Directed 350+ team members."') == "Directed 350+ team members."
+    assert _clean_text("Optimized ops. *(Note: add metrics like \"by 20%\".)*") == "Optimized ops."
+    assert _clean_text('"Did X." (Note: you could also say Y.)') == "Did X."
+    assert _clean_text("Plain bullet with no artifacts.") == "Plain bullet with no artifacts."
+
+
+def test_ensure_ats_polish_sanitizes_bullets():
+    from apps.ai.enhance import ensure_ats_polish
+    d = schema.empty_resume()
+    d["basics"]["summary"] = '"A summary in quotes."'
+    d["work"] = [{"position": "Eng", "company": "C", "highlights": [
+        'Built systems. *(Note: add a metric here.)*', '"Led the team."']}]
+    out = ensure_ats_polish(d)
+    assert out["basics"]["summary"] == "A summary in quotes."
+    assert out["work"][0]["highlights"][0] == "Built systems."
+    assert out["work"][0]["highlights"][1] == "Led the team."
+
+
 def test_ensure_ats_polish_leaves_rich_skills_untouched():
     from apps.ai.enhance import ensure_ats_polish
     d = schema.empty_resume()
