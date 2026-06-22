@@ -45,6 +45,25 @@ def test_compare_page_renders(client):
     assert "Before" in body and "After" in body
 
 
+def test_compare_shows_skill_gap_when_jd_has_missing_skills(client):
+    original = _raw_resume()  # has Python only
+    enhanced = enhance.enhance_resume_data(original)
+    r = services.create_resume(
+        "s", data=enhanced, original_data=original,
+        job_description="Need Python, Django, AWS, Docker and Kubernetes experience.")
+    body = client.get(f"/r/{r.id}/compare/?t={r.edit_token}").content.decode()
+    assert "Skills to learn to fully match this job" in body
+    assert "Django" in body and "AWS" in body  # display-formatted missing skills
+
+
+def test_compare_no_skill_gap_panel_without_jd(client):
+    original = _raw_resume()
+    enhanced = enhance.enhance_resume_data(original)
+    r = services.create_resume("s", data=enhanced, original_data=original)  # no JD
+    body = client.get(f"/r/{r.id}/compare/?t={r.edit_token}").content.decode()
+    assert "Skills to learn to fully match" not in body
+
+
 def test_keep_original_restores_snapshot(client):
     original = _raw_resume()
     enhanced = enhance.enhance_resume_data(original)

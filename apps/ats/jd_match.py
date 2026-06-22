@@ -13,6 +13,17 @@ W_TITLE = 20
 W_EDUCATION = 10
 W_SOFT = 15
 
+# Skill tokens that should display upper-cased rather than title-cased.
+_ACRONYMS = {"aws", "gcp", "sql", "api", "css", "html", "ci/cd", "ml", "ai",
+             "nlp", "etl", "qa", "ios", "php", "tcp/ip", "rest", "json", "k8s"}
+
+
+def _display(term: str) -> str:
+    t = (term or "").strip()
+    if t.lower() in _ACRONYMS:
+        return t.upper()
+    return t[:1].upper() + t[1:] if t else t
+
 
 def _ratio(found: list[str], required: list[str]) -> float:
     if not required:
@@ -70,9 +81,9 @@ def score(data: dict, jd_text: str) -> dict:
 
     return {
         "score": final,
-        "matched": hard_found + soft_found,
-        "missing": hard_missing,
-        "suggested": suggested,
+        "matched": [_display(s) for s in hard_found + soft_found],
+        "missing": [_display(s) for s in hard_missing],
+        "suggested": [_display(s) for s in suggested],
         "dimensions": dimensions,
         "warnings": warnings,
         "target": "Aim for 75%+. Don't chase 100% — keyword stuffing gets you rejected by humans.",

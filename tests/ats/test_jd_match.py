@@ -33,7 +33,8 @@ def test_weak_resume_misses_skills():
     data = {"basics": {"summary": "I like computers"}, "work": [], "skills": []}
     result = jd_match.score(data, JD)
     assert result["score"] < 50
-    assert "python" in result["missing"]
+    # missing skills are display-formatted (e.g. "Python", "AWS")
+    assert "python" in [m.lower() for m in result["missing"]]
 
 
 def test_high_match_warns_about_over_optimization(strong_resume_data):
