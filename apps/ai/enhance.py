@@ -44,13 +44,15 @@ def enhance_resume_data(data: dict) -> dict:
         logger.exception("LLM enhance failed; using local fallback")
         result = {}
 
+    enhanced = None
     if isinstance(result, dict) and (_KNOWN & set(result.keys())):
-        enhanced = schema.merge_into_resume(original, result)
-        # Never let the model silently DROP jobs/education/projects. If it
-        # returned fewer items in any list section, fall back to local enhance.
-        if not schema.validate_resume_data(enhanced) and not _dropped_entries(original, enhanced):
-            return enhanced
-    return _local_enhance(original)
+        merged = schema.merge_into_resume(original, result)
+        # Never let the model silently DROP jobs/education/projects.
+        if not schema.validate_resume_data(merged) and not _dropped_entries(original, merged):
+            enhanced = merged
+    if enhanced is None:
+        enhanced = _local_enhance(original)
+    return ensure_ats_polish(enhanced)
 
 
 def _dropped_entries(original: dict, enhanced: dict) -> bool:
@@ -59,6 +61,75 @@ def _dropped_entries(original: dict, enhanced: dict) -> bool:
         if len(enhanced.get(key, [])) < len(original.get(key, [])):
             return True
     return False
+
+
+# --- deterministic ATS polish (guarantees the score levers) -----------------
+
+_LABEL_NOISE = {"expert", "specialist", "professional", "head", "lead", "leader"}
+
+
+def _skill_count(data: dict) -> int:
+    return sum(len(s.get("keywords") or []) or (1 if s.get("name") else 0)
+              for s in data.get("skills", []))
+
+
+def ensure_ats_polish(data: dict) -> dict:
+    """Guarantee a Skills section (the biggest ATS-compatibility lever) when the
+    resume clearly has skills in its content but no skills section. Never
+    fabricates — only surfaces skills already present in titles/summary/bullets."""
+    if _skill_count(data) >= 6:
+        return data
+
+    from apps.ats.keywords import HARD_SKILL_TAXONOMY
+
+    basics = data.get("basics", {})
+    derived: list[str] = []
+
+    _LEAD_FILLER = {"in", "and", "the", "a", "an", "of", "with", "for", "to",
+                    "on", "at", "by", "driving", "drive", "including", "across"}
+
+    def _add(kw: str):
+        words = " ".join(kw.split()).strip(" ,.-").split()
+        while words and words[0].lower() in _LEAD_FILLER:
+            words = words[1:]
+        kw = " ".join(words)
+        if kw and kw.lower() not in {d.lower() for d in derived} and 1 <= len(words) <= 4:
+            derived.append(kw)
+
+    # 1) Skill phrases from the professional title (e.g. "Revenue Growth Expert").
+    label = basics.get("label") or ""
+    for part in re.split(r"[|,/•·]| - | – ", label):
+        words = [w for w in part.split() if w.lower() not in _LABEL_NOISE]
+        if 1 <= len(words) <= 4:
+            _add(" ".join(words))
+
+    # 1b) Competency phrases from the summary ("<word> management/leadership/…").
+    summary = basics.get("summary") or ""
+    for m in re.finditer(
+        r"\b([A-Za-z][\w&-]*(?:\s+[A-Za-z][\w&-]*)?)\s+"
+        r"(management|leadership|development|operations|strategy|planning|analysis|"
+        r"growth|optimization|collaboration|engineering|design|administration)\b",
+        summary, re.I):
+        _add(m.group(0))
+
+    # 2) Known hard skills mentioned anywhere in the resume text.
+    blob = " ".join([
+        basics.get("summary") or "", label,
+        " ".join(h for j in data.get("work", []) for h in (j.get("highlights") or [])),
+        " ".join(j.get("position") or "" for j in data.get("work", [])),
+    ]).lower()
+    for skill in sorted(HARD_SKILL_TAXONOMY, key=len, reverse=True):
+        if re.search(rf"(?<![a-z]){re.escape(skill.lower())}(?![a-z])", blob):
+            _add(skill if skill.isupper() else skill.title())
+
+    if len(derived) >= 3:
+        data = deepcopy(data)
+        existing = data.get("skills") or []
+        existing_kw = {k.lower() for s in existing for k in (s.get("keywords") or [])}
+        fresh = [d for d in derived if d.lower() not in existing_kw][:12]
+        # Prepend a "Core Skills" group so the section is present + scannable.
+        data["skills"] = [{"name": "Core Skills", "keywords": fresh}] + existing
+    return data
 
 
 def _local_enhance(data: dict) -> dict:

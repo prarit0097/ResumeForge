@@ -42,6 +42,39 @@ def test_dropped_entries_detector():
     assert enhance._dropped_entries(a, same) is False
 
 
+def test_ensure_ats_polish_adds_skills_and_lifts_score():
+    from apps.ai.enhance import ensure_ats_polish
+    from apps.ats import compatibility
+    from apps.templates_engine import registry
+
+    d = schema.empty_resume()
+    d["basics"].update({
+        "name": "Prarit", "email": "p@x.com", "phone": "123", "location": "R",
+        "label": "Sales Manager | Revenue Growth Expert | Business Development Specialist",
+        "summary": "Seasoned sales leader with over five years of experience in sales leadership and operational management, consistently driving revenue growth and strategic planning across teams.",
+    })
+    d["work"] = [{"position": "Sales Manager", "company": "J", "current": True,
+                  "startDate": "2021-10", "highlights": ["Directed a team of 350.", "Increased revenue by 30%."]}]
+    d["education"] = [{"institution": "RTU", "studyType": "B.Tech"}]
+
+    before = compatibility.score_resume(d, registry.get("classic"))["score"]
+    polished = ensure_ats_polish(d)
+    after = compatibility.score_resume(polished, registry.get("classic"))["score"]
+
+    assert polished["skills"] and len(polished["skills"][0]["keywords"]) >= 6
+    # No junk leading filler words in derived skills.
+    for kw in polished["skills"][0]["keywords"]:
+        assert kw.split()[0].lower() not in {"in", "and", "the", "of", "driving"}
+    assert after > before and after >= 95
+
+
+def test_ensure_ats_polish_leaves_rich_skills_untouched():
+    from apps.ai.enhance import ensure_ats_polish
+    d = schema.empty_resume()
+    d["skills"] = [{"name": "X", "keywords": ["a", "b", "c", "d", "e", "f", "g"]}]
+    assert ensure_ats_polish(d)["skills"] == d["skills"]
+
+
 def test_summary_non_positive_delta_phrasing():
     original = _resume()
     result = enhance.summarize_improvements(original, original, 80, 80)

@@ -13,7 +13,14 @@ STRONG_ACTION_VERBS = {
     "increased", "reduced", "achieved", "implemented", "automated", "spearheaded",
     "negotiated", "streamlined", "accelerated", "generated", "directed",
     "established", "engineered", "orchestrated", "transformed", "mentored",
-    "analyzed", "architected", "boosted", "cut", "drove", "grew", "shipped",
+    "analyzed", "architected", "boosted", "cut", "grew", "shipped",
+    # additional legitimate strong/leadership verbs
+    "oversaw", "supervised", "coordinated", "executed", "championed", "pioneered",
+    "headed", "founded", "modernized", "consolidated", "formulated", "devised",
+    "facilitated", "expanded", "exceeded", "secured", "partnered", "drove",
+    "produced", "introduced", "revamped", "redesigned", "enabled", "maximized",
+    "minimized", "resolved", "elevated", "advanced", "guided", "directed",
+    "supported", "enhanced", "maintained", "led",
 }
 
 WEAK_OPENERS = {

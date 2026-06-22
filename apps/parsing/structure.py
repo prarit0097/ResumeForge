@@ -112,7 +112,7 @@ def extract_and_enhance(raw_text: str) -> tuple[dict, dict]:
     if isinstance(orig_raw, dict) and (_KNOWN_SECTIONS & set(orig_raw.keys())):
         original = _coerce_to_resume(_unwrap_envelope(orig_raw))
         if isinstance(enh_raw, dict) and (_KNOWN_SECTIONS & set(enh_raw.keys())):
-            enhanced = _coerce_to_resume(_unwrap_envelope(enh_raw))
+            enhanced = ai_enhance.ensure_ats_polish(_coerce_to_resume(_unwrap_envelope(enh_raw)))
         else:
             enhanced = ai_enhance.enhance_resume_data(original)
         return original, enhanced
