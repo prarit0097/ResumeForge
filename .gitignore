@@ -33,3 +33,5 @@ runserver.log
 Thumbs.db
 _live_walkthrough.py
 _*.py
+# …but never ignore Python package markers (the _*.py rule would catch __init__.py).
+!__init__.py
