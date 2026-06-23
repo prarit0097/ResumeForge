@@ -33,33 +33,34 @@
       {# Build new — POST so prefetchers/crawlers can't create orphan drafts. #}
       <form method="post" action="{% url 'builder:start_new' %}" class="h-full">
         {% csrf_token %}
-        <button type="submit"
-           class="group flex h-full w-full flex-col text-left rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand transition">
+        <button type="submit" style="--i:0;--rf-glow:79,70,229"
+           class="group rf-attn flex h-full w-full flex-col text-left rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand transition">
           <div class="flex items-center justify-between">
             <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-brand-soft text-brand text-lg">✍️</span>
-            <span class="text-slate-300 group-hover:text-brand transition">→</span>
+            <span class="rf-arrow text-slate-300 group-hover:text-brand transition">→</span>
           </div>
           <h2 class="mt-4 font-display text-lg font-semibold">Build a new resume</h2>
           <p class="mt-1 text-sm text-slate-600">Answer a few prompts. AI drafts strong, quantified bullets for you.</p>
         </button>
       </form>
 
-      <a href="{% url 'parsing:upload' %}"
-         class="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-accent transition">
+      <a href="{% url 'parsing:upload' %}" style="--i:1;--rf-glow:16,185,129"
+         class="group rf-attn flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-accent transition">
         <div class="flex items-center justify-between">
           <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-emerald-50 text-accent text-lg">⬆️</span>
-          <span class="text-slate-300 group-hover:text-accent transition">→</span>
+          <span class="rf-arrow text-slate-300 group-hover:text-accent transition">→</span>
         </div>
         <h2 class="mt-4 font-display text-lg font-semibold">Enhance an existing one</h2>
         <p class="mt-1 text-sm text-slate-600">Upload a PDF or Word file. We fix it for ATS and tailor it to a job.</p>
       </a>
 
       {# Check ATS score — a label so clicking the card opens the file picker. #}
-      <label class="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-violet-400 transition cursor-pointer">
+      <label style="--i:2;--rf-glow:139,92,246"
+             class="group rf-attn flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-violet-400 transition cursor-pointer">
         <input type="file" accept=".pdf,.docx" class="hidden" @change="check($event)">
         <div class="flex items-center justify-between">
           <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-violet-50 text-violet-600 text-lg">🎯</span>
-          <span class="text-slate-300 group-hover:text-violet-500 transition">→</span>
+          <span class="rf-arrow text-slate-300 group-hover:text-violet-500 transition">→</span>
         </div>
         <h2 class="mt-4 font-display text-lg font-semibold">Check your ATS score</h2>
         <p class="mt-1 text-sm text-slate-600">Upload your resume for an instant 0–100 ATS score — free.</p>
@@ -157,7 +158,33 @@
   @keyframes rf-sheen { 0% { background-position: 0 0;} 100% { background-position: 200% 0;} }
   .rf-indeterminate { animation: rf-ind 1.2s ease-in-out infinite; }
   @keyframes rf-ind { 0% { margin-left:-33%;} 100% { margin-left:100%;} }
-  @media (prefers-reduced-motion: reduce){ .rf-blink-cta,.rf-indeterminate{ animation:none; } }
+
+  /* Attention cue on the 3 hero cards: staggered rise-in on load, then a soft
+     looping glow "wave" sweeping left→right (each card in its own accent). */
+  .rf-attn {
+    opacity: 0;
+    animation:
+      rf-rise .6s cubic-bezier(.16,1,.3,1) both,
+      rf-glow 3.4s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 110ms), calc(1s + var(--i) * 420ms);
+  }
+  .rf-attn:hover { animation-play-state: paused, paused; }   /* settle on hover */
+  @keyframes rf-rise {
+    from { opacity: 0; transform: translateY(22px) scale(.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes rf-glow {
+    0%, 100% { box-shadow: 0 1px 2px rgba(15,23,42,.06); border-color: rgb(226,232,240); }
+    50%      { box-shadow: 0 14px 34px rgba(var(--rf-glow), .30); border-color: rgba(var(--rf-glow), .55); }
+  }
+  /* Arrow gently nudges right in sync with the glow, then rests. */
+  .rf-arrow { animation: rf-nudge 3.4s ease-in-out infinite; animation-delay: calc(1s + var(--i,0) * 420ms); }
+  @keyframes rf-nudge { 0%,40%,100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+
+  @media (prefers-reduced-motion: reduce){
+    .rf-blink-cta,.rf-indeterminate,.rf-arrow{ animation:none; }
+    .rf-attn{ opacity:1; animation:none; }
+  }
 </style>
 <script>
   function atsCheck(csrf) {

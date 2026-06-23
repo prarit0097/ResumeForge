@@ -518,6 +518,7 @@ chmod +x deploy/deploy.sh        # first time only
 
 > Append newest at the top. Keep entries one line. Update this whenever the app changes.
 
+- **2026-06-23** — Added an attention animation to the 3 hero cards: staggered rise-in on load + a looping colored glow "wave" (each card in its own accent) + a gentle arrow nudge (respects prefers-reduced-motion).
 - **2026-06-23** — Removed the "My drafts" link from the header nav (route/page `builder:my_drafts` still exists, just not surfaced).
 - **2026-06-23** — Renamed product to **Rezoom**; unified landing into a 3-card row (Build / Enhance
   / Check ATS) with an on-theme result panel + loading-lock; deployed to production at
