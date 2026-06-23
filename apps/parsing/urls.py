@@ -5,4 +5,5 @@ from . import views
 app_name = "parsing"
 urlpatterns = [
     path("enhance/", views.upload, name="upload"),
+    path("ats-check/", views.ats_check, name="ats_check"),
 ]
