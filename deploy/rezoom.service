@@ -1,0 +1,23 @@
+# systemd unit for Rezoom (gunicorn). Copy to /etc/systemd/system/rezoom.service
+# then:  sudo systemctl daemon-reload && sudo systemctl enable --now rezoom
+#
+# The app reads its config from the project's .env directly (django-environ), so
+# no EnvironmentFile is needed. Port 8011 is chosen to avoid clashing with the
+# other apps on this VPS — change it if 8011 is taken (also update nginx.conf).
+[Unit]
+Description=Rezoom (gunicorn)
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/var/www/rezoom
+Environment=GUNICORN_BIND=127.0.0.1:8011
+ExecStart=/var/www/rezoom/.venv/bin/gunicorn resumeforge.wsgi:application -c gunicorn.conf.py
+Restart=always
+RestartSec=3
+# PDF export launches Chromium; give it room.
+LimitNOFILE=8192
+
+[Install]
+WantedBy=multi-user.target

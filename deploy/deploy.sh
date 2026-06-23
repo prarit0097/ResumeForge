@@ -23,7 +23,7 @@ echo "==> Collecting static files"
 python manage.py collectstatic --noinput
 
 echo "==> Restarting service"
-sudo systemctl restart resumeforge
+sudo systemctl restart rezoom
 
 echo "==> Done."
-sudo systemctl --no-pager status resumeforge | head -6
+sudo systemctl --no-pager status rezoom | head -6
