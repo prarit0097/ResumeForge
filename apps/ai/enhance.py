@@ -97,6 +97,31 @@ def _clean_text(s: str) -> str:
     return s.strip(" \"'“”")
 
 
+def _looks_like_keyword(kw: str) -> bool:
+    """A real skill keyword is short — not a sentence or an achievement line."""
+    kw = (kw or "").strip()
+    if not kw or len(kw) > 45 or ":" in kw or kw.endswith("."):
+        return False
+    return len(kw.split()) <= 4
+
+
+def _clean_skills(skills) -> list:
+    """Keep only concise keyword skills; drop sentence/achievement 'skills' (e.g.
+    'Revenue Growth Success: Increased sales by 30%…') so the section is a clean,
+    scannable keyword list, not a wall of prose."""
+    cleaned = []
+    for g in (skills or []):
+        if not isinstance(g, dict):
+            continue
+        name = (g.get("name") or "").strip()
+        kws = [str(k).strip() for k in (g.get("keywords") or []) if _looks_like_keyword(str(k))]
+        if not kws:
+            continue
+        gname = name if (name and len(name.split()) <= 4 and ":" not in name and not name.endswith(".")) else "Skills"
+        cleaned.append({"name": gname, "keywords": kws})
+    return cleaned
+
+
 def _sanitize_in_place(data: dict) -> None:
     b = data.get("basics", {})
     if b.get("summary"):
@@ -106,6 +131,7 @@ def _sanitize_in_place(data: dict) -> None:
             if entry.get("summary"):
                 entry["summary"] = _clean_text(entry["summary"])
             entry["highlights"] = [_clean_text(h) for h in (entry.get("highlights") or []) if _clean_text(h)]
+    data["skills"] = _clean_skills(data.get("skills"))
 
 
 def ensure_ats_polish(data: dict) -> dict:
