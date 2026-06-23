@@ -53,8 +53,15 @@ def test_drafts_page_renders(client):
 
 
 def test_privacy_headers_present(client):
+    # Landing is a public marketing page -> indexable (no noindex), so it can be
+    # found and traffic measured.
     resp = client.get("/")
-    assert resp["X-Robots-Tag"].startswith("noindex")
-    # same-origin (not no-referrer): protects the token URL from external sites
-    # without breaking same-origin form POSTs (which no-referrer does via Origin: null).
+    assert "X-Robots-Tag" not in resp
     assert resp["Referrer-Policy"] == "same-origin"
+
+
+def test_resume_pages_are_noindex(client):
+    # Resume pages carry PII + the secret token -> must never be indexed.
+    rid, token = _new(client)
+    resp = client.get(f"/r/{rid}/edit/?t={token}")
+    assert resp["X-Robots-Tag"].startswith("noindex")

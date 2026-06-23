@@ -9,10 +9,13 @@ env = environ.Env(
     DEBUG=(bool, True),
     SECRET_KEY=(str, ""),
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
+    CSRF_TRUSTED_ORIGINS=(list, []),
     OPENROUTER_API_KEY=(str, ""),
     LLM_MODEL=(str, "deepseek/deepseek-v4-flash"),
     LLM_FREE_MODEL=(str, "deepseek/deepseek-chat-v3-0324:free"),
     USE_FREE_LLM=(bool, False),
+    GA_MEASUREMENT_ID=(str, ""),   # Google Analytics 4 ID, e.g. G-XXXXXXXXXX
+    SITE_URL=(str, ""),            # e.g. https://resume.yourdomain.com (for canonical/OG)
 )
 
 # Read .env if present (never required; app works without it).
@@ -22,6 +25,8 @@ if env_file.exists():
 
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+# Required for CSRF on POST forms when served behind a domain over HTTPS.
+CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 
 # In production a real SECRET_KEY is mandatory. In DEBUG we generate an
 # ephemeral one so local dev needs no config — but never ship a known key.
@@ -51,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serve static files in production
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -70,6 +76,7 @@ TEMPLATES = [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "apps.ai.context.demo_mode",
+                "core.context.site",
             ],
         },
     },
@@ -98,10 +105,22 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# WhiteNoise serves static files directly from the app (no separate nginx static
+# config needed). In production it compresses + hashes filenames (cache-busting);
+# in dev the plain storage avoids needing collectstatic.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Analytics / SEO (env-driven; empty in dev so nothing loads).
+GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID")
+SITE_URL = env("SITE_URL")
 
 # --- ResumeForge / LLM config ---
 OPENROUTER_API_KEY = env("OPENROUTER_API_KEY")
@@ -129,3 +148,5 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # Hash + compress static filenames for far-future caching behind WhiteNoise.
+    STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedManifestStaticFilesStorage"

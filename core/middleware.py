@@ -9,12 +9,21 @@ POSTs, which Django's CSRF check then rejects (breaks uploads and form buttons).
 """
 
 
+# Paths that contain personal resume data (or its secret token) must never be
+# indexed. Public marketing pages (landing, the upload/enhance intro) SHOULD be
+# indexable so the site can be found and traffic measured.
+_PII_PREFIXES = ("/r/", "/drafts")
+
+
 class PrivacyHeadersMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         response = self.get_response(request)
-        response.setdefault("X-Robots-Tag", "noindex, nofollow")
+        if request.path.startswith(_PII_PREFIXES):
+            response.setdefault("X-Robots-Tag", "noindex, nofollow")
+        # same-origin keeps the secret ?t= token URL off external sites (it is
+        # never sent cross-origin) while keeping CSRF working on form POSTs.
         response.setdefault("Referrer-Policy", "same-origin")
         return response

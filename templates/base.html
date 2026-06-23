@@ -3,8 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>{% block title %}ResumeForge — ATS Resume Builder{% endblock %}</title>
+  <title>{% block title %}ResumeForge — Free AI ATS Resume Builder{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Free AI resume builder. Create an ATS-friendly resume or enhance your existing one, tailor it to any job, and download clean PDF, Word or PNG — no login, no watermark.{% endblock %}" />
+  {% if INDEXABLE %}<meta name="robots" content="index, follow" />{% else %}<meta name="robots" content="noindex, nofollow" />{% endif %}
+  {% if SITE_URL %}<link rel="canonical" href="{{ SITE_URL }}{{ request.path }}" />{% endif %}
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ResumeForge" />
+  <meta property="og:title" content="{% block og_title %}ResumeForge — Free AI ATS Resume Builder{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}Build or enhance an ATS-friendly resume with AI, tailor it to any job, and download free PDF / Word.{% endblock %}" />
+  {% if SITE_URL %}<meta property="og:url" content="{{ SITE_URL }}{{ request.path }}" />{% endif %}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ResumeForge — Free AI ATS Resume Builder" />
+  <meta name="twitter:description" content="Build or enhance an ATS-friendly resume with AI. Free, no login." />
+
+  {% if GA_MEASUREMENT_ID %}
+  <!-- Google Analytics (GA4). Masks the resume id and strips the secret ?t= token
+       so no private data is ever sent to Google. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    var rfPath = location.pathname.replace(/\/r\/[0-9a-fA-F-]{16,}\//, '/r/_/');
+    gtag('config', '{{ GA_MEASUREMENT_ID }}', {
+      page_path: rfPath,
+      page_location: location.origin + rfPath
+    });
+  </script>
+  {% endif %}
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
