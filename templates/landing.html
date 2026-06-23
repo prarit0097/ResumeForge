@@ -25,8 +25,11 @@
       and lets you download a clean, parse-safe file — in seconds, for free.
     </p>
 
-    <!-- Three ways to start, one row -->
-    <div class="mt-8 grid gap-4 sm:grid-cols-3 max-w-4xl">
+    <!-- Three ways to start, one row. Disabled while an ATS check runs so an
+         accidental click can't navigate away and break the flow. -->
+    <div class="mt-8 grid gap-4 sm:grid-cols-3 max-w-4xl transition"
+         :class="loading ? 'opacity-50 pointer-events-none' : ''"
+         :aria-busy="loading">
       {# Build new — POST so prefetchers/crawlers can't create orphan drafts. #}
       <form method="post" action="{% url 'builder:start_new' %}" class="h-full">
         {% csrf_token %}
@@ -160,12 +163,15 @@
   function atsCheck(csrf) {
     return {
       csrf, fileName: "", loading: false, error: "", result: null,
-      loadingMsg: "Reading your resume…", _timer: null,
+      loadingMsg: "Reading your resume…", _timer: null, _warnRef: null,
       async check(e) {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file || this.loading) return;   // ignore extra clicks mid-check
         this.fileName = file.name; this.error = ""; this.result = null; this.loading = true;
         this._cycle();
+        // Warn if the user tries to navigate away while the check is running.
+        if (!this._warnRef) this._warnRef = (ev) => { ev.preventDefault(); ev.returnValue = ""; };
+        window.addEventListener("beforeunload", this._warnRef);
         const fd = new FormData(); fd.append("resume", file);
         try {
           const res = await fetch("{% url 'parsing:ats_check' %}", {
@@ -176,7 +182,12 @@
           else this.error = json.error || "Couldn't check this resume — please try again.";
         } catch (err) {
           this.error = "Network error — please try again.";
-        } finally { this.loading = false; clearInterval(this._timer); }
+        } finally {
+          this.loading = false;
+          clearInterval(this._timer);
+          window.removeEventListener("beforeunload", this._warnRef);
+          e.target.value = "";   // allow re-selecting the same file
+        }
       },
       _cycle() {
         const msgs = ["Reading your resume…", "Extracting your experience…", "Scoring against ATS rules…"];
