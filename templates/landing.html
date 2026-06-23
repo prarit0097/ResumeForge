@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Free AI Resume Builder & ATS Checker — No Login | Rezoom{% endblock %}
 {% block meta_description %}Free AI resume builder and ATS checker. Build or enhance an ATS-friendly resume, get your ATS score, tailor it to any job, and download free PDF, Word or PNG — no login, no watermark.{% endblock %}
-{% block jsonld %}{% include "seo/_faq_jsonld.html" %}{% endblock %}
+{% block jsonld %}{% include "seo/_faq_jsonld.html" %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo","name":"How to build an ATS-friendly resume with Rezoom","totalTime":"PT5M","step":[{"@type":"HowToStep","name":"Build or upload","text":"Answer a few prompts, or upload your current resume to enhance it."},{"@type":"HowToStep","name":"Check your ATS score","text":"Get a 0-100 compatibility score with specific, actionable fixes."},{"@type":"HowToStep","name":"Tailor to the job","text":"Paste a job description to see your match score and missing keywords."},{"@type":"HowToStep","name":"Pick a template and download","text":"Choose a template and export free PDF, Word or PNG."}]}
+</script>{% endblock %}
 
 {% block content %}
 <!-- Hero -->
@@ -33,7 +36,7 @@
       {# Build new — POST so prefetchers/crawlers can't create orphan drafts. #}
       <form method="post" action="{% url 'builder:start_new' %}" class="h-full">
         {% csrf_token %}
-        <button type="submit" style="--i:0;--rf-glow:79,70,229"
+        <button type="submit" data-cta="build" style="--i:0;--rf-glow:79,70,229"
            class="group rf-attn flex h-full w-full flex-col text-left rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-brand transition">
           <div class="flex items-center justify-between">
             <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-brand-soft text-brand text-lg">✍️</span>
@@ -44,7 +47,7 @@
         </button>
       </form>
 
-      <a href="{% url 'parsing:upload' %}" style="--i:1;--rf-glow:16,185,129"
+      <a href="{% url 'parsing:upload' %}" data-cta="enhance" style="--i:1;--rf-glow:16,185,129"
          class="group rf-attn flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-accent transition">
         <div class="flex items-center justify-between">
           <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-emerald-50 text-accent text-lg">⬆️</span>
@@ -55,7 +58,7 @@
       </a>
 
       {# Check ATS score — a label so clicking the card opens the file picker. #}
-      <label style="--i:2;--rf-glow:139,92,246"
+      <label data-cta="check_ats" style="--i:2;--rf-glow:139,92,246"
              class="group rf-attn flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-violet-400 transition cursor-pointer">
         <input type="file" accept=".pdf,.docx" class="hidden" @change="check($event)">
         <div class="flex items-center justify-between">

@@ -16,6 +16,7 @@ env = environ.Env(
     USE_FREE_LLM=(bool, False),
     GA_MEASUREMENT_ID=(str, ""),   # Google Analytics 4 ID, e.g. G-XXXXXXXXXX
     SITE_URL=(str, ""),            # e.g. https://resume.yourdomain.com (for canonical/OG)
+    GOOGLE_SITE_VERIFICATION=(str, ""),  # Search Console HTML-tag verification token
 )
 
 # Read .env if present (never required; app works without it).
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sessions",
     "django.contrib.humanize",
+    "django.contrib.sitemaps",
     "apps.resumes",
     "apps.builder",
     "apps.parsing",
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
     "apps.templates_engine",
     "apps.exporting",
     "apps.coverletters",
+    "apps.blog",
 ]
 
 MIDDLEWARE = [
@@ -121,6 +124,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Analytics / SEO (env-driven; empty in dev so nothing loads).
 GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID")
 SITE_URL = env("SITE_URL")
+GOOGLE_SITE_VERIFICATION = env("GOOGLE_SITE_VERIFICATION")
 
 # --- ResumeForge / LLM config ---
 OPENROUTER_API_KEY = env("OPENROUTER_API_KEY")

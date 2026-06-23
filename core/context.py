@@ -14,5 +14,6 @@ def site(request):
         # the resume id and strips the ?t= token query so nothing private leaks.
         "GA_MEASUREMENT_ID": ga,
         "SITE_URL": getattr(settings, "SITE_URL", "").rstrip("/"),
+        "GOOGLE_SITE_VERIFICATION": getattr(settings, "GOOGLE_SITE_VERIFICATION", ""),
         "INDEXABLE": not on_pii_page,
     }

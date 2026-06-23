@@ -7,6 +7,7 @@ django-environ==0.11.2
 django-ratelimit==4.1.0
 jsonschema==4.23.0
 beautifulsoup4==4.12.3
+markdown==3.7
 # --- production server / static serving ---
 gunicorn==23.0.0
 whitenoise==6.8.2

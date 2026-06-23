@@ -1,54 +1,72 @@
-"""SEO endpoints: robots.txt and sitemap.xml (no extra apps needed).
+"""SEO endpoints: robots.txt + sitemaps (via Django's sitemap framework).
 
-Public, indexable pages are listed in PUBLIC_PAGES. Resume/draft pages and the
-POST API namespaces are kept out of the index (they carry PII or aren't content).
+Public, indexable pages live in StaticPagesSitemap; blog posts in BlogSitemap.
+Resume/draft pages and the POST API namespaces are kept out of the index (they
+carry PII or aren't content).
 """
 from __future__ import annotations
 
+from datetime import date
+
+from django.contrib.sitemaps import Sitemap
 from django.http import HttpResponse
 from django.urls import reverse
-from django.utils.timezone import now
-
-# (url-name, changefreq, priority) for indexable marketing/content pages.
-PUBLIC_PAGES = [
-    ("core:landing", "weekly", "1.0"),
-    ("core:ats_checker", "weekly", "0.9"),
-    ("core:resume_templates", "weekly", "0.8"),
-    ("parsing:upload", "weekly", "0.8"),
-]
 
 _DISALLOW = ["/r/", "/drafts", "/ai/", "/ats/", "/new/"]
-
-
-def _base(request) -> str:
-    return f"{request.scheme}://{request.get_host()}"
+# Bumped when the static marketing pages meaningfully change.
+_STATIC_LASTMOD = date(2026, 6, 24)
 
 
 def robots_txt(request):
-    base = _base(request)
+    base = f"{request.scheme}://{request.get_host()}"
     lines = ["User-agent: *", "Allow: /"]
     lines += [f"Disallow: {p}" for p in _DISALLOW]
     lines += ["", f"Sitemap: {base}/sitemap.xml", ""]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
-def sitemap_xml(request):
-    base = _base(request)
-    today = now().date().isoformat()
-    urls = []
-    for name, changefreq, priority in PUBLIC_PAGES:
-        try:
-            loc = base + reverse(name)
-        except Exception:  # noqa: BLE001 - skip any page not wired yet
-            continue
-        urls.append(
-            f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod>"
-            f"<changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>"
-        )
-    xml = (
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        + "\n".join(urls)
-        + "\n</urlset>\n"
-    )
-    return HttpResponse(xml, content_type="application/xml")
+class StaticPagesSitemap(Sitemap):
+    """Indexable marketing/content pages (auto lastmod via the framework)."""
+
+    protocol = "https"
+    changefreq = "weekly"
+
+    def items(self) -> list[str]:
+        return [
+            "core:landing",
+            "core:ats_checker",
+            "core:resume_templates",
+            "parsing:upload",
+            "blog:index",
+        ]
+
+    def location(self, item: str) -> str:
+        return reverse(item)
+
+    def priority(self, item: str) -> float:
+        return 1.0 if item == "core:landing" else 0.8
+
+    def lastmod(self, item: str) -> date:
+        return _STATIC_LASTMOD
+
+
+class BlogSitemap(Sitemap):
+    """One entry per published blog post, with its real lastmod."""
+
+    protocol = "https"
+    changefreq = "monthly"
+    priority = 0.7
+
+    def items(self):
+        from apps.blog.registry import POSTS
+
+        return POSTS
+
+    def location(self, post) -> str:
+        return reverse("blog:post", args=[post.slug])
+
+    def lastmod(self, post):
+        return post.updated
+
+
+SITEMAPS = {"static": StaticPagesSitemap, "blog": BlogSitemap}

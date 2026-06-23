@@ -149,7 +149,7 @@ backfires in interviews. **Do not regress this.**
 | Validation | **jsonschema** (JSON Resume shape) |
 | Rate limiting | **django-ratelimit** |
 | Config | **django-environ** (`.env`) |
-| Tests | **pytest** + **pytest-django** (101 tests) |
+| Tests | **pytest** + **pytest-django** (106 tests) |
 
 Pinned versions live in [`requirements.txt`](requirements.txt).
 
@@ -172,7 +172,8 @@ under `apps/` plus a `core/` package for cross-cutting concerns.
 | `apps.templates_engine` | 103-template registry (ATS metadata), resume→HTML render (shared preview/export), gallery, custom template tags. |
 | `apps.exporting` | PDF/PNG (Playwright), DOCX (python-docx), TXT, download menu. |
 | `apps.coverletters` | AI cover-letter generation + editor. |
-| `core` | Landing/marketing pages, no-login access control, sessions, context processor, privacy middleware, SEO (robots/sitemap). |
+| `apps.blog` | File-based content blog at `/blog/` — Markdown posts in `content/*.md`, parsed once at import (no DB/admin); index + post views, Article/Breadcrumb schema. |
+| `core` | Landing/marketing pages, no-login access control, sessions, context processor, privacy middleware, SEO (robots/sitemaps). |
 
 ---
 
@@ -319,6 +320,8 @@ if ≥88. Constants (`STRONG_ACTION_VERBS`, `WEAK_OPENERS`, `CANONICAL_HEADINGS`
 
 **Cover letters** — GET `/r/<uuid>/cover-letter/` · POST `…/generate/` (15/m) · POST `…/save/` (60/m)
 
+**Blog** — GET `/blog/` → `blog:index` · GET `/blog/<slug>/` → `blog:post`
+
 ---
 
 ## 13. Project structure
@@ -341,10 +344,11 @@ AtsResumeBuilder/
 │   ├── ats/                      # compatibility, jd_match, keywords, constants, views
 │   ├── templates_engine/         # registry, render, samples, views, templatetags/
 │   ├── exporting/                # render_browser, docx_builder, plain_text, views
-│   └── coverletters/             # services, views
-├── templates/                    # base.html, landing.html, builder/*, parsing/*, pages/*, resume_templates/*, seo/*
-├── static/                       # css/app.css, css/resume.css, js/editor.js
-├── tests/                        # 101 tests across the apps
+│   ├── coverletters/             # services, views
+│   └── blog/                     # registry.py, views, urls, content/*.md (the 4 launch articles)
+├── templates/                    # base.html, landing.html, builder/*, parsing/*, pages/*, blog/*, resume_templates/*, seo/*
+├── static/                       # css/app.css, css/resume.css, js/editor.js, img/og-default.png, img/logo-512.png
+├── tests/                        # 106 tests across the apps
 └── deploy/                       # rezoom.service, nginx.conf, deploy.sh
 ```
 
@@ -366,7 +370,8 @@ Read by `resumeforge/settings.py` via django-environ. In `DEBUG` mode everything
 | `LLM_FREE_MODEL` | `deepseek/deepseek-chat-v3-0324:free` | Used when `USE_FREE_LLM=True`. |
 | `USE_FREE_LLM` | `False` | Switch to the free model. |
 | `GA_MEASUREMENT_ID` | (empty) | GA4 id (`G-XXXX`); empty → no analytics loaded. |
-| `SITE_URL` | (empty) | Base URL for canonical/OG/sitemap. |
+| `SITE_URL` | (empty) | Base URL for canonical/OG/sitemap. Must be set in prod (OG images are gated on it). |
+| `GOOGLE_SITE_VERIFICATION` | (empty) | Search Console HTML-tag token; renders `<meta name="google-site-verification">` when set. |
 
 Other settings: upload cap **5 MB**, allowed types **PDF + DOCX**, SQLite DB, session-backed identity.
 
@@ -391,7 +396,7 @@ python manage.py runserver                # http://127.0.0.1:8000
 ## 16. Testing
 
 ```bash
-python -m pytest -q                # 101 tests (pytest + pytest-django)
+python -m pytest -q                # 106 tests (pytest + pytest-django)
 ```
 - `conftest.py` forces the **Mock** LLM provider so tests are hermetic (no network/API key).
 - Coverage spans every app: ai, ats, parsing, builder, resumes, templates_engine, exporting,
@@ -506,11 +511,25 @@ chmod +x deploy/deploy.sh        # first time only
 
 ## 20. SEO
 
-- `core/seo.py` — `robots_txt` (disallows `/r/`, `/drafts`, `/ai/`, `/ats/`, `/new/`) + `sitemap_xml`
-  over `PUBLIC_PAGES` (landing, ats_checker, resume_templates, enhance).
-- `templates/base.html` — per-page `<title>`/meta/canonical, Open Graph + Twitter, **JSON-LD**
-  WebApplication (free, price 0) + FAQ schema, GA4 gtag (masks resume id, strips the `?t=` token).
+- `core/seo.py` — `robots_txt` (disallows `/r/`, `/drafts`, `/ai/`, `/ats/`, `/new/`) + sitemaps via
+  **Django's sitemap framework**: `StaticPagesSitemap` (landing, ats_checker, resume_templates,
+  enhance, blog index — with `lastmod`/`priority`) + `BlogSitemap` (one entry per post, real `lastmod`).
+- `templates/base.html` — per-page `<title>`/meta/canonical, Open Graph (`og:image` 1200×630 from
+  `static/img/og-default.png`, gated on `SITE_URL`; `og:type` block → `article` on posts), Twitter card
+  (falls back to OG so it's per-page), `theme-color`, env-gated `google-site-verification`, and **JSON-LD**:
+  WebApplication (free, price 0) + **Organization** (square `logo-512.png`) site-wide.
+- Per-page JSON-LD: **HowTo** (homepage), **BreadcrumbList** (ats_checker, resume_templates, posts),
+  **FAQPage** (landing/ats_checker/templates), **Article** + **Blog/BlogPosting** (blog).
+- GA4 gtag masks the resume id + strips the `?t=` token; a delegated `[data-cta]` click listener fires a
+  `start_resume` conversion event (cards carry `data-cta="build|enhance|check_ats"`).
+- The blog (`apps.blog`) is the long-term ranking engine: drop a new `content/<slug>.md` (frontmatter:
+  `title, slug, target_keyword, meta_description, date`) and it auto-appears in `/blog/`, the sitemap, and
+  nav/footer. A bad `.md` file is skipped+logged, never crashes startup.
 - `PrivacyHeadersMiddleware` keeps private `/r/*` & `/drafts` pages `noindex`.
+
+**Manual (operator-only) SEO steps — not code:** create a GA4 property → set `GA_MEASUREMENT_ID`;
+verify in Google Search Console + Bing → set `GOOGLE_SITE_VERIFICATION`, submit `sitemap.xml`, request
+indexing; off-page (Product Hunt, directories, listicles). Publish ~1 new blog post/week.
 
 ---
 
@@ -518,6 +537,7 @@ chmod +x deploy/deploy.sh        # first time only
 
 > Append newest at the top. Keep entries one line. Update this whenever the app changes.
 
+- **2026-06-24** — SEO upgrade: shipped a file-based `/blog/` (`apps.blog`, 4 launch articles, Markdown via `markdown` dep) wired into nav/footer + sitemap; added `og:image` (generated `og-default.png` 1200×630) + `og:type` + theme-color; richer JSON-LD (Organization w/ square `logo-512.png`, HowTo, BreadcrumbList, Article/Blog); switched sitemap to Django's framework with `lastmod`; env-gated Search Console verification (`GOOGLE_SITE_VERIFICATION`); GA4 `start_resume` conversion events on the CTAs. Hardened blog loader (bad file skipped, not fatal). 106 tests.
 - **2026-06-23** — Added an attention animation to the 3 hero cards: staggered rise-in on load + a looping colored glow "wave" (each card in its own accent) + a gentle arrow nudge (respects prefers-reduced-motion).
 - **2026-06-23** — Removed the "My drafts" link from the header nav (route/page `builder:my_drafts` still exists, just not surfaced).
 - **2026-06-23** — Renamed product to **Rezoom**; unified landing into a 3-card row (Build / Enhance
@@ -545,7 +565,7 @@ chmod +x deploy/deploy.sh        # first time only
 | Update | `cd /var/www/rezoom && ./deploy/deploy.sh` |
 | Logs | `journalctl -u rezoom -f` |
 | Local run | `python manage.py runserver` (after venv + migrate) |
-| Tests | `python -m pytest -q` (101) |
+| Tests | `python -m pytest -q` (106) |
 | Templates | 103 (86 ATS-safe) |
 | AI model | `deepseek/deepseek-v4-flash` via OpenRouter |
 | DB | SQLite (`db.sqlite3`) |

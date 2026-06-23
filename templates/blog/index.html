@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Resume & ATS Career Blog | Rezoom{% endblock %}
+{% block meta_description %}Honest, practical guides on ATS-friendly resumes, formats, keywords and getting more interview calls — from the team behind the free Rezoom ATS checker.{% endblock %}
+{% block og_title %}Resume & ATS Guides — Rezoom Blog{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 sm:px-6 py-14">
+  <p class="text-sm font-medium text-brand">Rezoom blog</p>
+  <h1 class="mt-2 font-display text-4xl sm:text-5xl font-semibold tracking-tight">Resume &amp; ATS guides that are actually honest</h1>
+  <p class="mt-4 max-w-2xl text-lg text-slate-600">
+    No-fluff advice on beating the resume black hole — clean ATS-safe formats, the real keywords recruiters
+    search for, and what actually turns applications into interview calls.
+  </p>
+
+  <div class="mt-10 grid gap-5 sm:grid-cols-2">
+    {% for post in posts %}
+    <a href="{% url 'blog:post' post.slug %}"
+       class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-brand transition">
+      <h2 class="font-display text-xl font-semibold leading-snug group-hover:text-brand transition">{{ post.title }}</h2>
+      <p class="mt-2 flex-1 text-sm text-slate-600">{{ post.description }}</p>
+      <p class="mt-4 text-xs text-slate-400">{{ post.updated|date:"M j, Y" }} · {{ post.read_min }} min read</p>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="mt-12 rounded-2xl border border-slate-200 bg-brand-soft/40 p-6 text-center">
+    <p class="font-display text-xl font-semibold">Put it into practice</p>
+    <p class="mt-1 text-slate-600">Check your resume's ATS score free — no login, no watermark.</p>
+    <a href="{% url 'core:ats_checker' %}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark transition">Check my ATS score →</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Blog","name":"Rezoom Blog","url":"{{ SITE_URL }}/blog/","description":"Honest guides on ATS-friendly resumes and the job search.","blogPost":[{% for post in posts %}{"@type":"BlogPosting","headline":"{{ post.title|escapejs }}","url":"{{ SITE_URL }}/blog/{{ post.slug }}/","image":"{{ SITE_URL }}{% static 'img/og-default.png' %}","datePublished":"{{ post.published|date:'Y-m-d' }}","dateModified":"{{ post.updated|date:'Y-m-d' }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endblock %}

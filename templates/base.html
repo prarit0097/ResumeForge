@@ -8,14 +8,21 @@
   {% if INDEXABLE %}<meta name="robots" content="index, follow" />{% else %}<meta name="robots" content="noindex, nofollow" />{% endif %}
   {% if SITE_URL %}<link rel="canonical" href="{{ SITE_URL }}{{ request.path }}" />{% endif %}
   <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
   <meta property="og:site_name" content="Rezoom" />
   <meta property="og:title" content="{% block og_title %}Rezoom — Free AI ATS Resume Builder{% endblock %}" />
   <meta property="og:description" content="{% block og_description %}Build or enhance an ATS-friendly resume with AI, tailor it to any job, and download free PDF / Word.{% endblock %}" />
   {% if SITE_URL %}<meta property="og:url" content="{{ SITE_URL }}{{ request.path }}" />{% endif %}
+  {# Twitter falls back to the og:* tags (which are per-page), so we don't hardcode them. #}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Rezoom — Free AI ATS Resume Builder" />
-  <meta name="twitter:description" content="Build or enhance an ATS-friendly resume with AI. Free, no login." />
+  {% if SITE_URL %}
+  <meta property="og:image" content="{% block og_image %}{{ SITE_URL }}{% static 'img/og-default.png' %}{% endblock %}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Rezoom — free AI resume builder and ATS checker" />
+  {% endif %}
+  <meta name="theme-color" content="#4f46e5" />
+  {% if GOOGLE_SITE_VERIFICATION %}<meta name="google-site-verification" content="{{ GOOGLE_SITE_VERIFICATION }}" />{% endif %}
 
   {% if GA_MEASUREMENT_ID %}
   <!-- Google Analytics (GA4). Masks the resume id and strips the secret ?t= token
@@ -29,6 +36,11 @@
     gtag('config', '{{ GA_MEASUREMENT_ID }}', {
       page_path: rfPath,
       page_location: location.origin + rfPath
+    });
+    // Conversion signal: fire when a user starts a resume (build / enhance / check).
+    document.addEventListener('click', function (e) {
+      var el = e.target.closest && e.target.closest('[data-cta]');
+      if (el && window.gtag) gtag('event', 'start_resume', { method: el.dataset.cta });
     });
   </script>
   {% endif %}
@@ -77,6 +89,9 @@
     ]
   }
   </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Rezoom","url":"{{ SITE_URL }}/","logo":"{{ SITE_URL }}{% static 'img/logo-512.png' %}","description":"Free, no-login AI resume builder and ATS checker.","sameAs":["https://github.com/prarit0097/ResumeForge"]}
+  </script>
   {% block jsonld %}{% endblock %}
   {% block head_extra %}{% endblock %}
 </head>
@@ -94,6 +109,7 @@
         Rezoom
       </a>
       <div class="flex items-center gap-2 sm:gap-3 text-sm">
+        <a href="{% url 'blog:index' %}" class="hidden sm:inline text-slate-600 hover:text-ink">Blog</a>
         <form method="post" action="{% url 'builder:start_new' %}" class="inline">{% csrf_token %}<button type="submit" class="rounded-lg bg-brand px-3 py-1.5 font-medium text-white hover:bg-brand-dark transition">Build resume</button></form>
       </div>
     </nav>
@@ -108,6 +124,7 @@
         <a href="{% url 'core:ats_checker' %}" class="hover:text-ink">ATS Resume Checker</a>
         <a href="{% url 'core:resume_templates' %}" class="hover:text-ink">Resume Templates</a>
         <a href="{% url 'parsing:upload' %}" class="hover:text-ink">Enhance a Resume</a>
+        <a href="{% url 'blog:index' %}" class="hover:text-ink">Blog</a>
       </nav>
       <div class="mt-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between border-t border-slate-100 pt-4">
         <p>Rezoom — free, ATS-safe resumes. No login required.</p>

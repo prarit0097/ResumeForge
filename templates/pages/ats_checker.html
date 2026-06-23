@@ -2,7 +2,10 @@
 {% block title %}Free ATS Resume Checker — Score Your Resume Instantly | Rezoom{% endblock %}
 {% block meta_description %}Free ATS resume checker. Get an instant 0–100 ATS score with specific fixes, check your resume against any job description, and make it ATS-friendly — no login.{% endblock %}
 {% block og_title %}Free ATS Resume Checker — Instant ATS Score{% endblock %}
-{% block jsonld %}{% include "seo/_faq_jsonld.html" %}{% endblock %}
+{% block jsonld %}{% include "seo/_faq_jsonld.html" %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"{{ SITE_URL }}/"},{"@type":"ListItem","position":2,"name":"ATS Resume Checker","item":"{{ SITE_URL }}{% url 'core:ats_checker' %}"}]}
+</script>{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-3xl px-4 sm:px-6 pt-16 pb-8 text-center">
