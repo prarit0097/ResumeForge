@@ -39,6 +39,13 @@ LANDING_FAQS = [
     ("What file formats can I download?",
      "Text-selectable PDF (the ATS standard), an ATS-clean Word (DOCX) file, and a PNG image — "
      "all free and watermark-free. There's also a 'what the ATS sees' plain-text preview."),
+    ("What's the best file format for an ATS — PDF or Word?",
+     "Both work. A text-selectable PDF is the safest, most common choice and keeps your formatting; "
+     "some application systems specifically ask for an editable Word (.docx) file. ResumeForge exports "
+     "both for free, so you can match whatever the application asks for."),
+    ("Can I convert my existing resume to an editable Word document?",
+     "Yes. Upload your current PDF or Word resume, we parse it into the editor, and you can export a "
+     "clean, editable .docx — without retyping it from scratch."),
 ]
 
 
@@ -87,9 +94,11 @@ def resume_templates_view(request):
          "Yes. All templates render the same resume data, so you can switch any time and your "
          "content stays intact."),
     ]
+    all_t = registry.all_templates()
     return render(request, "pages/resume_templates.html", {
         "previews": _sample_template_previews(),
         "categories": registry.categories(),
-        "template_count": len(registry.all_templates()),
+        "template_count": len(all_t),
+        "ats_safe_count": sum(1 for t in all_t if t.ats_safe),
         "faqs": faqs,
     })

@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}100+ Free ATS Resume Templates (PDF & Word) | ResumeForge{% endblock %}
-{% block meta_description %}Browse 100+ free, ATS-friendly resume templates. Every template is single-column parse-safe or clearly labelled, free to download as PDF or Word — no watermark, no login.{% endblock %}
-{% block og_title %}100+ Free ATS-Friendly Resume Templates{% endblock %}
+{% block title %}100+ Free Resume Templates (ATS-Safe & Creative) | ResumeForge{% endblock %}
+{% block meta_description %}Browse 100+ free resume templates — {{ ats_safe_count }} single-column ATS-safe designs plus creative options, each clearly labelled. Download free as PDF or Word, no watermark, no login.{% endblock %}
+{% block og_title %}100+ Free Resume Templates — ATS-Safe & Creative{% endblock %}
 {% block head_extra %}<link rel="stylesheet" href="{% static 'css/resume.css' %}?v={{ ASSET_VERSION }}">
 <style>.tpl-thumb{height:300px;overflow:hidden;border-radius:12px;background:#eef2f7;border:1px solid #e2e8f0}.tpl-thumb .rf-doc{transform:scale(.46);transform-origin:top left;box-shadow:0 4px 16px rgba(0,0,0,.1)}</style>{% endblock %}
 {% block jsonld %}{% include "seo/_faq_jsonld.html" %}{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-3xl px-4 sm:px-6 pt-16 pb-6 text-center">
-  <h1 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">{{ template_count }}+ free ATS resume templates</h1>
+  <h1 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">{{ template_count }}+ free resume templates</h1>
   <p class="mt-4 text-lg text-slate-600">
-    Professional, <strong>ATS-friendly resume templates</strong> across {{ categories|length }} styles — from simple and
-    minimal to modern and creative. Every one is free to download as PDF or Word, with no watermark and no login.
+    Professional <strong>resume templates</strong> across {{ categories|length }} styles — including
+    <strong>{{ ats_safe_count }} single-column ATS-safe designs</strong> plus modern and creative layouts, each clearly
+    labelled. Every one is free to download as PDF or Word, with no watermark and no login.
   </p>
   <form method="post" action="{% url 'builder:start_new' %}" class="mt-6">{% csrf_token %}
     <button class="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">Use a template — build your resume →</button>
