@@ -10,7 +10,7 @@ env = environ.Env(
     SECRET_KEY=(str, ""),
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
     OPENROUTER_API_KEY=(str, ""),
-    LLM_MODEL=(str, "deepseek/deepseek-chat-v3-0324"),
+    LLM_MODEL=(str, "deepseek/deepseek-v4-flash"),
     LLM_FREE_MODEL=(str, "deepseek/deepseek-chat-v3-0324:free"),
     USE_FREE_LLM=(bool, False),
 )

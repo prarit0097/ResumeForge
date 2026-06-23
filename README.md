@@ -59,7 +59,7 @@ live AI generation, get an [OpenRouter](https://openrouter.ai/) API key and set 
 
 ```
 OPENROUTER_API_KEY=sk-or-...
-LLM_MODEL=deepseek/deepseek-chat-v3-0324
+LLM_MODEL=deepseek/deepseek-v4-flash
 # Set USE_FREE_LLM=True to use the free (rate-limited) DeepSeek model.
 ```
 
