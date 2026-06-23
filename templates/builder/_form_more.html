@@ -35,6 +35,31 @@
   </div>
 
   <div>
+    <h3 class="font-semibold mb-2">Languages</h3>
+    <template x-for="(l, i) in (data.languages || [])" :key="i">
+      <div class="flex gap-2 mb-2">
+        <input class="rf-in" x-model="l.language" placeholder="Language (e.g. English)">
+        <input class="rf-in max-w-[12rem]" x-model="l.fluency" placeholder="Fluency (e.g. Native)">
+        <button type="button" @click="remove(data.languages, i)" class="rf-del shrink-0">✕</button>
+      </div>
+    </template>
+    <button type="button" @click="addLanguage()" class="rf-add-block">+ Add language</button>
+  </div>
+
+  <div>
+    <h3 class="font-semibold mb-2">Awards &amp; achievements</h3>
+    <template x-for="(a, i) in (data.awards || [])" :key="i">
+      <div class="flex gap-2 mb-2">
+        <input class="rf-in" x-model="a.title" placeholder="Award / achievement">
+        <input class="rf-in max-w-[10rem]" x-model="a.awarder" placeholder="Given by">
+        <input class="rf-in max-w-[7rem]" x-model="a.date" placeholder="2023">
+        <button type="button" @click="remove(data.awards, i)" class="rf-del shrink-0">✕</button>
+      </div>
+    </template>
+    <button type="button" @click="addAward()" class="rf-add-block">+ Add award</button>
+  </div>
+
+  <div>
     <h3 class="font-semibold mb-2">Target job description <span class="text-slate-400 font-normal text-sm">(optional — powers tailoring & match score)</span></h3>
     <textarea class="rf-in min-h-[120px]" x-model="data.__jd"
               placeholder="Paste the job description you're targeting here."></textarea>

@@ -23,9 +23,12 @@
           Achievements (bullets)
           <button type="button" @click="aiGenerateBullets(i)" :disabled="aiBusy" class="rf-ai-btn">✨ Suggest bullets</button>
         </span>
+        <p class="text-xs text-slate-400 mb-1">One achievement per box — click "+ Add bullet" for each. (Pasting several lines auto-splits them.)</p>
         <template x-for="(h, hi) in job.highlights" :key="hi">
-          <div class="flex gap-2 mb-2">
+          <div class="flex gap-2 mb-2 items-start">
+            <span class="mt-2.5 text-slate-400 shrink-0">•</span>
             <textarea class="rf-in min-h-[44px]" x-model="job.highlights[hi]"
+                      @blur="splitBullets(job.highlights, hi)"
                       placeholder="Led X to achieve Y, resulting in Z% improvement"></textarea>
             <button type="button" @click="remove(job.highlights, hi)" class="rf-del shrink-0">✕</button>
           </div>

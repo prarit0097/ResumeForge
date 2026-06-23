@@ -49,8 +49,10 @@
 .rf-dates { color: var(--muted); font-size: 9pt; white-space: nowrap; }
 .rf-entry-sub { color: var(--muted); font-style: italic; font-size: 9.5pt; }
 .rf-entry-summary { margin: 3px 0; }
-.rf-doc ul { margin: 4px 0 0; padding-left: 18px; }
-.rf-doc li { margin-bottom: 2px; }
+/* list-style is set explicitly because Tailwind's CDN preflight resets it to
+   none on the live preview — without this, bullets render with no • marker. */
+.rf-doc ul { margin: 4px 0 0; padding-left: 18px; list-style: disc outside; }
+.rf-doc li { margin-bottom: 2px; display: list-item; }
 .rf-skills { margin: 0; }
 
 /* ---- Style modifiers (multiply distinctness across templates) ---- */

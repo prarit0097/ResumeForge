@@ -150,8 +150,18 @@ function resumeEditor(config) {
     addSkill() { this.data.skills.push({ name: "", keywords: [] }); },
     addProject() { this.data.projects.push({ name: "", description: "", highlights: [""] }); },
     addCert() { this.data.certifications.push({ name: "", issuer: "", date: "" }); },
+    addLanguage() { (this.data.languages ||= []).push({ language: "", fluency: "" }); },
+    addAward() { (this.data.awards ||= []).push({ title: "", awarder: "", date: "" }); },
     addHighlight(item) { item.highlights.push(""); },
     remove(arr, idx) { arr.splice(idx, 1); },
+
+    // If a user typed/pasted several lines into ONE bullet box, split them into
+    // separate bullets so each renders as its own • point.
+    splitBullets(arr, idx) {
+      const parts = String(arr[idx] || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+      if (parts.length > 1) arr.splice(idx, 1, ...parts);
+      else if (parts.length === 1) arr[idx] = parts[0];
+    },
 
     skillKeywords(skill) { return (skill.keywords || []).join(", "); },
     setSkillKeywords(skill, value) {
