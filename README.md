@@ -2,6 +2,9 @@
 
 > Product name: **Rezoom**. The Django package/repository is named `resumeforge`/`ResumeForge`
 > (kept stable to avoid breaking imports, deploy units and the GitHub remote).
+>
+> 📖 **Full reference — what/why, architecture, every app & route, deployment commands, and the
+> maintenance/changelog — is in [REZOOM.md](REZOOM.md). Keep it updated on every change.**
 
 A free, no-login, **ATS-optimized AI resume builder**. Build a new resume with AI,
 or upload an existing one to enhance it — score it against real ATS rules, tailor it
