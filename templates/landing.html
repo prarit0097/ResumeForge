@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block title %}Free AI Resume Builder & ATS Checker — No Login | ResumeForge{% endblock %}
+{% block meta_description %}Free AI resume builder and ATS checker. Build or enhance an ATS-friendly resume, get your ATS score, tailor it to any job, and download free PDF, Word or PNG — no login, no watermark.{% endblock %}
+{% block jsonld %}{% include "seo/_faq_jsonld.html" %}{% endblock %}
 
 {% block content %}
 <!-- Hero -->
@@ -66,4 +69,32 @@
     We make sure your resume <em>parses cleanly</em> and surfaces the <em>right real skills</em> so a recruiter finds you.
   </p>
 </section>
+
+<!-- SEO content: what / how / why-free -->
+<section class="mx-auto max-w-3xl px-4 sm:px-6 py-10 prose-slate">
+  <h2 class="font-display text-2xl sm:text-3xl font-semibold">The free AI resume builder that actually gets you found</h2>
+  <p class="mt-4 text-slate-600 leading-relaxed">
+    ResumeForge is a <strong>free, no-login resume builder and ATS checker</strong>. Start from scratch and let AI write
+    strong, quantified bullet points, or upload an existing PDF or Word resume and we'll restructure it to be ATS-friendly
+    in seconds. Either way you get a live
+    <a href="{% url 'core:ats_checker' %}" class="text-brand font-medium hover:underline">ATS resume score</a>,
+    one-click tailoring to any job description, and a clean file you can download for free.
+  </p>
+
+  <h3 class="mt-8 font-semibold text-lg">How it works</h3>
+  <ol class="mt-3 space-y-2 text-slate-600 text-sm list-decimal pl-5">
+    <li><strong>Build or upload.</strong> Answer a few prompts, or upload your current resume to enhance it.</li>
+    <li><strong>Check your ATS score.</strong> Get a 0–100 compatibility score with specific, actionable fixes.</li>
+    <li><strong>Tailor to the job.</strong> Paste a job description to see your match score and missing keywords.</li>
+    <li><strong>Pick a template &amp; download.</strong> Choose from <a href="{% url 'core:resume_templates' %}" class="text-brand font-medium hover:underline">100+ ATS-friendly resume templates</a> and export free PDF, Word or PNG.</li>
+  </ol>
+
+  <h3 class="mt-8 font-semibold text-lg">Why it's genuinely free</h3>
+  <p class="mt-3 text-slate-600 text-sm leading-relaxed">
+    Most "free" resume builders make you pay to download or stamp a watermark on your file. ResumeForge doesn't.
+    There's no paywall, no watermark and no account — build it, score it, tailor it and download it, completely free.
+  </p>
+</section>
+
+{% include "seo/_faqs.html" %}
 {% endblock %}

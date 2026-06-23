@@ -56,6 +56,28 @@
   <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
   <script src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}?v={{ ASSET_VERSION }}" />
+
+  <!-- Structured data: helps Google show ResumeForge as a free web app in results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ResumeForge",
+    "alternateName": "ResumeForge AI Resume Builder & ATS Checker",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript",
+    {% if SITE_URL %}"url": "{{ SITE_URL }}/",{% endif %}
+    "description": "Free, no-login AI resume builder and ATS resume checker. Build or enhance a resume, get a live ATS score, tailor it to any job, and download clean PDF, Word or PNG — no watermark.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": [
+      "AI resume builder", "ATS resume checker (0-100 score)", "Tailor resume to a job description",
+      "100+ ATS-friendly resume templates", "Free PDF, Word and PNG download", "AI cover letter generator",
+      "No login, no watermark"
+    ]
+  }
+  </script>
+  {% block jsonld %}{% endblock %}
   {% block head_extra %}{% endblock %}
 </head>
 <body class="min-h-screen bg-paper font-sans text-ink antialiased">
@@ -81,9 +103,17 @@
   <main>{% block content %}{% endblock %}</main>
 
   <footer class="mt-20 border-t border-slate-200 bg-white">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-slate-500 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-      <p>ResumeForge — free, ATS-safe resumes. No login required.</p>
-      <p class="text-slate-400">Built for humans, parsed by machines.</p>
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-slate-500">
+      <nav class="flex flex-wrap gap-x-5 gap-y-2" aria-label="Footer">
+        <a href="{% url 'core:landing' %}" class="hover:text-ink">Free Resume Builder</a>
+        <a href="{% url 'core:ats_checker' %}" class="hover:text-ink">ATS Resume Checker</a>
+        <a href="{% url 'core:resume_templates' %}" class="hover:text-ink">Resume Templates</a>
+        <a href="{% url 'parsing:upload' %}" class="hover:text-ink">Enhance a Resume</a>
+      </nav>
+      <div class="mt-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between border-t border-slate-100 pt-4">
+        <p>ResumeForge — free, ATS-safe resumes. No login required.</p>
+        <p class="text-slate-400">Built for humans, parsed by machines.</p>
+      </div>
     </div>
   </footer>
   {% block body_extra %}{% endblock %}

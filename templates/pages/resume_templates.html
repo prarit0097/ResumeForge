@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}100+ Free ATS Resume Templates (PDF & Word) | ResumeForge{% endblock %}
+{% block meta_description %}Browse 100+ free, ATS-friendly resume templates. Every template is single-column parse-safe or clearly labelled, free to download as PDF or Word — no watermark, no login.{% endblock %}
+{% block og_title %}100+ Free ATS-Friendly Resume Templates{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'css/resume.css' %}?v={{ ASSET_VERSION }}">
+<style>.tpl-thumb{height:300px;overflow:hidden;border-radius:12px;background:#eef2f7;border:1px solid #e2e8f0}.tpl-thumb .rf-doc{transform:scale(.46);transform-origin:top left;box-shadow:0 4px 16px rgba(0,0,0,.1)}</style>{% endblock %}
+{% block jsonld %}{% include "seo/_faq_jsonld.html" %}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 sm:px-6 pt-16 pb-6 text-center">
+  <h1 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">{{ template_count }}+ free ATS resume templates</h1>
+  <p class="mt-4 text-lg text-slate-600">
+    Professional, <strong>ATS-friendly resume templates</strong> across {{ categories|length }} styles — from simple and
+    minimal to modern and creative. Every one is free to download as PDF or Word, with no watermark and no login.
+  </p>
+  <form method="post" action="{% url 'builder:start_new' %}" class="mt-6">{% csrf_token %}
+    <button class="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">Use a template — build your resume →</button>
+  </form>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for p in previews %}
+    <div>
+      <div class="tpl-thumb">{% include p.meta.partial with resume=p.obj meta=p.meta %}</div>
+      <div class="mt-2 flex items-center justify-between">
+        <span class="font-medium text-sm">{{ p.meta.name }}</span>
+        <span class="text-xs {% if p.meta.ats_safe %}text-emerald-600{% else %}text-amber-600{% endif %}">{% if p.meta.ats_safe %}ATS-safe{% else %}Creative{% endif %}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="mt-6 text-center text-sm text-slate-500">…and {{ template_count }} more. Switch templates any time without losing your content.</p>
+</section>
+
+<section class="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+  <h2 class="font-display text-2xl font-semibold">Which resume template is best for ATS?</h2>
+  <p class="mt-3 text-slate-600 text-sm leading-relaxed">
+    For maximum ATS compatibility, choose a <strong>single-column template</strong> with standard headings (Summary, Work
+    Experience, Education, Skills) and selectable text — no tables, no text boxes, no graphics-as-text. ResumeForge labels
+    every template as <em>ATS-safe</em> or <em>creative</em> so you can pick with confidence, and our
+    <a href="{% url 'core:ats_checker' %}" class="text-brand font-medium hover:underline">free ATS checker</a> scores your
+    finished resume so you know it will parse cleanly.
+  </p>
+</section>
+
+{% include "seo/_faqs.html" %}
+{% endblock %}
