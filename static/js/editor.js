@@ -155,12 +155,24 @@ function resumeEditor(config) {
     addHighlight(item) { item.highlights.push(""); },
     remove(arr, idx) { arr.splice(idx, 1); },
 
-    // If a user typed/pasted several lines into ONE bullet box, split them into
-    // separate bullets so each renders as its own • point.
+    // If a user pasted several lines into ONE bullet box, split them into
+    // separate bullets — but only at line breaks that start a GENUINELY new
+    // bullet. A line that continues the previous sentence (starts lowercase or
+    // with a conjunction, or the previous line ended mid-clause with a comma)
+    // is merged back, so "…renewals,\nand compliance." stays a single bullet.
     splitBullets(arr, idx) {
-      const parts = String(arr[idx] || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-      if (parts.length > 1) arr.splice(idx, 1, ...parts);
-      else if (parts.length === 1) arr[idx] = parts[0];
+      const lines = String(arr[idx] || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+      if (lines.length <= 1) { arr[idx] = lines[0] || ""; return; }
+      const CONT = /^(and|or|but|to|with|the|a|an|of|in|for|on|by|that|which|while|as|at|including|ensuring|resulting|driving|leading|reducing|improving|increasing)\b/i;
+      const out = [];
+      for (let line of lines) {
+        line = line.replace(/^[•\-\*•]\s*/, "").trim();
+        const prev = out.length ? out[out.length - 1] : null;
+        const isContinuation = prev && (/^[a-z]/.test(line) || CONT.test(line) || /[,;:]$/.test(prev));
+        if (isContinuation) out[out.length - 1] = prev + " " + line;
+        else out.push(line);
+      }
+      arr.splice(idx, 1, ...out);
     },
 
     skillKeywords(skill) { return (skill.keywords || []).join(", "); },
