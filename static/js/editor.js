@@ -71,6 +71,30 @@ function resumeEditor(config) {
       }
     },
 
+    // --- one-click AI polish (make the whole resume professional) ---
+    polishing: false,
+    async autoComplete() {
+      if (!this.urls.polish || this.polishing) return;
+      this.polishing = true;
+      try {
+        await this.save();  // persist current edits first
+        const res = await fetch(this.urls.polish, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRFToken": this.csrf },
+          body: JSON.stringify({}),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.ok) { window.location.reload(); return; }
+        }
+        this.saveError = "Couldn't polish — please try again.";
+      } catch (e) {
+        this.saveError = "Network error while polishing.";
+      } finally {
+        this.polishing = false;
+      }
+    },
+
     // --- onboarding / guided progress ---
     guideDismissed: false,
     STEPS: [

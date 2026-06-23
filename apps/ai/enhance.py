@@ -85,6 +85,9 @@ def _clean_text(s: str) -> str:
         return s
     s = _NOTE_RE.sub("", s).strip()                 # drop trailing "(Note: …)" notes
     s = re.sub(r"\*?\([^)]*\bnote\b[^)]*\)\*?", "", s, flags=re.I)  # inline notes
+    # Remove placeholder metrics the model sometimes leaves (e.g. "by X%", "$Y").
+    s = re.sub(r"\s+by\s+[\$£€]?[XYNxyn]+\b%?", "", s)
+    s = re.sub(r"[\$£€]?\b[XYN]+%", "", s)
     s = s.replace("**", "").strip()
     # strip wrapping quotes (straight + curly), possibly several layers
     while len(s) >= 2 and s[0] in "\"'“”‘’" and s[-1] in "\"'“”‘’":

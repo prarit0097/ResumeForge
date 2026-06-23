@@ -7,6 +7,7 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
+from apps.resumes import services as resume_services
 from core.access import get_resume_or_404
 
 from . import services
@@ -38,6 +39,23 @@ def improve(request, resume_id):
     else:
         result = services.improve_text(text, str(payload.get("kind", "summary"))[:40])
     return JsonResponse({"text": result})
+
+
+@require_POST
+@ratelimit(key="ip", rate="10/m", block=True)
+def polish(request, resume_id):
+    """One-click: rewrite the WHOLE resume to be professional + ATS-strong.
+    Honest — improves real content (strong verbs, sharp summary, surfaced skills,
+    JD-tailoring if a JD is set); never fabricates jobs, skills or metrics."""
+    resume = get_resume_or_404(request, resume_id)
+    from apps.ai import enhance
+
+    jd = (resume.job_description or "").strip() or None
+    polished = enhance.enhance_resume_data(resume.data, jd)
+    errors = resume_services.update_resume_data(resume, polished)
+    if errors:
+        return JsonResponse({"ok": False, "error": "Could not polish the resume."}, status=400)
+    return JsonResponse({"ok": True})
 
 
 @require_POST
