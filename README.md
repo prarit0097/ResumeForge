@@ -1,11 +1,14 @@
-# ResumeForge
+# Rezoom
+
+> Product name: **Rezoom**. The Django package/repository is named `resumeforge`/`ResumeForge`
+> (kept stable to avoid breaking imports, deploy units and the GitHub remote).
 
 A free, no-login, **ATS-optimized AI resume builder**. Build a new resume with AI,
 or upload an existing one to enhance it — score it against real ATS rules, tailor it
 to any job description, pick from **100+ templates**, and download clean **PDF / Word /
 PNG** files. No accounts, no watermarks, no paywall.
 
-> Honest by design: ATS is a searchable database, not a judge. ResumeForge guarantees
+> Honest by design: ATS is a searchable database, not a judge. Rezoom guarantees
 > a **parse-safe structure** and surfaces the **right real keywords** so a human
 > recruiter actually finds you — it never keyword-stuffs.
 

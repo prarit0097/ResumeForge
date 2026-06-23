@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}ResumeForge — Free AI ATS Resume Builder{% endblock %}</title>
+  <title>{% block title %}Rezoom — Free AI ATS Resume Builder{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}Free AI resume builder. Create an ATS-friendly resume or enhance your existing one, tailor it to any job, and download clean PDF, Word or PNG — no login, no watermark.{% endblock %}" />
   {% if INDEXABLE %}<meta name="robots" content="index, follow" />{% else %}<meta name="robots" content="noindex, nofollow" />{% endif %}
   {% if SITE_URL %}<link rel="canonical" href="{{ SITE_URL }}{{ request.path }}" />{% endif %}
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="ResumeForge" />
-  <meta property="og:title" content="{% block og_title %}ResumeForge — Free AI ATS Resume Builder{% endblock %}" />
+  <meta property="og:site_name" content="Rezoom" />
+  <meta property="og:title" content="{% block og_title %}Rezoom — Free AI ATS Resume Builder{% endblock %}" />
   <meta property="og:description" content="{% block og_description %}Build or enhance an ATS-friendly resume with AI, tailor it to any job, and download free PDF / Word.{% endblock %}" />
   {% if SITE_URL %}<meta property="og:url" content="{{ SITE_URL }}{{ request.path }}" />{% endif %}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ResumeForge — Free AI ATS Resume Builder" />
+  <meta name="twitter:title" content="Rezoom — Free AI ATS Resume Builder" />
   <meta name="twitter:description" content="Build or enhance an ATS-friendly resume with AI. Free, no login." />
 
   {% if GA_MEASUREMENT_ID %}
@@ -57,13 +57,13 @@
   <script src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}?v={{ ASSET_VERSION }}" />
 
-  <!-- Structured data: helps Google show ResumeForge as a free web app in results -->
+  <!-- Structured data: helps Google show Rezoom as a free web app in results -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "ResumeForge",
-    "alternateName": "ResumeForge AI Resume Builder & ATS Checker",
+    "name": "Rezoom",
+    "alternateName": "Rezoom AI Resume Builder & ATS Checker",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "browserRequirements": "Requires JavaScript",
@@ -91,7 +91,7 @@
     <nav class="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between" aria-label="Main">
       <a href="{% url 'core:landing' %}" class="flex items-center gap-2 font-display text-xl font-semibold tracking-tight">
         <span class="inline-grid place-items-center h-7 w-7 rounded-lg bg-brand text-white text-sm">R</span>
-        ResumeForge
+        Rezoom
       </a>
       <div class="flex items-center gap-2 sm:gap-3 text-sm">
         <a href="{% url 'builder:my_drafts' %}" class="hidden sm:inline text-slate-600 hover:text-ink">My drafts</a>
@@ -111,7 +111,7 @@
         <a href="{% url 'parsing:upload' %}" class="hover:text-ink">Enhance a Resume</a>
       </nav>
       <div class="mt-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between border-t border-slate-100 pt-4">
-        <p>ResumeForge — free, ATS-safe resumes. No login required.</p>
+        <p>Rezoom — free, ATS-safe resumes. No login required.</p>
         <p class="text-slate-400">Built for humans, parsed by machines.</p>
       </div>
     </div>

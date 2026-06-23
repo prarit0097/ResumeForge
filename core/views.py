@@ -16,12 +16,12 @@ LANDING_FAQS = [
      "tailor it to a job, and download clean PDF, Word or PNG files with no watermark, no "
      "paywall and no account."),
     ("Do I need to sign up or log in?",
-     "No. ResumeForge needs no login. Your resume lives at a private, unguessable link you "
+     "No. Rezoom needs no login. Your resume lives at a private, unguessable link you "
      "can bookmark and return to from the same device."),
     ("What is an ATS and will it reject my resume?",
      "An Applicant Tracking System (ATS) is a searchable database recruiters use to store and "
      "find applicants — not a robot judge that auto-rejects you. The real risks are layouts that "
-     "parse badly (multi-column, tables, images) and missing keywords. ResumeForge guarantees a "
+     "parse badly (multi-column, tables, images) and missing keywords. Rezoom guarantees a "
      "parse-safe, single-column structure and shows exactly which real keywords to add."),
     ("How does the ATS resume checker score work?",
      "It checks the things that actually matter for parsing and recruiter scanning: contact "
@@ -29,7 +29,7 @@ LANDING_FAQS = [
      "skills section, standard headings and a single-column layout — and gives each a specific, "
      "actionable fix."),
     ("Can it tailor my resume to a specific job?",
-     "Yes. Paste the job description and ResumeForge shows your match score, the missing skills, "
+     "Yes. Paste the job description and Rezoom shows your match score, the missing skills, "
      "and can rewrite your summary and bullets to fit the role — using your real experience, "
      "never fabricating skills or numbers."),
     ("Are the resume templates ATS-friendly?",
@@ -41,7 +41,7 @@ LANDING_FAQS = [
      "all free and watermark-free. There's also a 'what the ATS sees' plain-text preview."),
     ("What's the best file format for an ATS — PDF or Word?",
      "Both work. A text-selectable PDF is the safest, most common choice and keeps your formatting; "
-     "some application systems specifically ask for an editable Word (.docx) file. ResumeForge exports "
+     "some application systems specifically ask for an editable Word (.docx) file. Rezoom exports "
      "both for free, so you can match whatever the application asks for."),
     ("Can I convert my existing resume to an editable Word document?",
      "Yes. Upload your current PDF or Word resume, we parse it into the editor, and you can export a "
@@ -68,7 +68,7 @@ def ats_checker_view(request):
     """SEO landing for 'ATS resume checker / ATS checker / resume score'."""
     faqs = [
         ("How do I check if my resume is ATS-friendly?",
-         "Upload or build your resume in ResumeForge and you instantly get a 0–100 ATS "
+         "Upload or build your resume in Rezoom and you instantly get a 0–100 ATS "
          "compatibility score with a checklist of specific fixes — contact info, action verbs, "
          "quantified results, a skills section, standard headings and a single-column layout."),
         ("Is the ATS checker free?",
@@ -88,7 +88,7 @@ def resume_templates_view(request):
          "Yes — every template is free to use and download with no watermark and no account."),
         ("Which resume template is best for ATS?",
          "A clean single-column template with standard headings and selectable text parses most "
-         "reliably. ResumeForge labels every template as ATS-safe or creative so you can choose "
+         "reliably. Rezoom labels every template as ATS-safe or creative so you can choose "
          "with confidence."),
         ("Can I switch templates without losing my content?",
          "Yes. All templates render the same resume data, so you can switch any time and your "

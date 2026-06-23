@@ -32,7 +32,7 @@ class OpenRouterProvider(LLMProvider):
         )
         self._headers = {
             "HTTP-Referer": "https://resumeforge.local",
-            "X-Title": "ResumeForge",
+            "X-Title": "Rezoom",
         }
 
     def complete(self, messages, *, temperature=0.4, max_tokens=800,

@@ -1,4 +1,4 @@
-/* ResumeForge editor — Alpine component.
+/* Rezoom editor — Alpine component.
    Holds the resume JSON, binds form fields, autosaves (debounced) by POSTing
    the data and swapping in the server-rendered preview HTML. */
 function resumeEditor(config) {
