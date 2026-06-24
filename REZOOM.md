@@ -345,7 +345,7 @@ AtsResumeBuilder/
 │   ├── templates_engine/         # registry, render, samples, views, templatetags/
 │   ├── exporting/                # render_browser, docx_builder, plain_text, views
 │   ├── coverletters/             # services, views
-│   └── blog/                     # registry.py, views, urls, content/*.md (the 4 launch articles)
+│   └── blog/                     # registry.py, views, urls, content/*.md (14 articles)
 ├── templates/                    # base.html, landing.html, builder/*, parsing/*, pages/*, blog/*, resume_templates/*, seo/*
 ├── static/                       # css/app.css, css/resume.css, js/editor.js, img/og-default.png, img/logo-512.png
 ├── tests/                        # 106 tests across the apps
@@ -537,6 +537,7 @@ indexing; off-page (Product Hunt, directories, listicles). Publish ~1 new blog p
 
 > Append newest at the top. Keep entries one line. Update this whenever the app changes.
 
+- **2026-06-24** — Content hub: +10 blog articles (14 total, ~16.5k words) on long-tail keywords (ATS-reject myth, ATS keywords, resume length, summary examples, tailoring to a JD, action verbs, resume mistakes, quantifying achievements, good ATS score, no-experience resume) — honest brand voice, "free" emphasis, fully interlinked, auto-wired into the sitemap (19 URLs). Verified Search Console (HTML-tag) + submitted sitemap.
 - **2026-06-24** — SEO upgrade: shipped a file-based `/blog/` (`apps.blog`, 4 launch articles, Markdown via `markdown` dep) wired into nav/footer + sitemap; added `og:image` (generated `og-default.png` 1200×630) + `og:type` + theme-color; richer JSON-LD (Organization w/ square `logo-512.png`, HowTo, BreadcrumbList, Article/Blog); switched sitemap to Django's framework with `lastmod`; env-gated Search Console verification (`GOOGLE_SITE_VERIFICATION`); GA4 `start_resume` conversion events on the CTAs. Hardened blog loader (bad file skipped, not fatal). 106 tests.
 - **2026-06-23** — Added an attention animation to the 3 hero cards: staggered rise-in on load + a looping colored glow "wave" (each card in its own accent) + a gentle arrow nudge (respects prefers-reduced-motion).
 - **2026-06-23** — Removed the "My drafts" link from the header nav (route/page `builder:my_drafts` still exists, just not surfaced).
